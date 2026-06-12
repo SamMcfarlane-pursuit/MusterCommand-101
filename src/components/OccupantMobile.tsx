@@ -95,7 +95,7 @@ export default function OccupantMobile({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Zod manual validation & XSS sanitization
-  const handleCheckIn = (status: "SAFE" | "NEED_HELP") => {
+  const handleCheckIn = (status: "ACCOUNTED" | "MEDICAL") => {
     setValidationError(null);
     setStatusMessage(null);
 
@@ -116,8 +116,8 @@ export default function OccupantMobile({
     onUpdateStatus(
       occupant.id,
       status,
-      selectedZone,
-      status === "NEED_HELP" ? safeNote : undefined,
+      occupant.mobilityImpaired ? undefined : selectedZone,
+      status === "MEDICAL" ? safeNote : undefined,
       isFallSensorEnabled
     );
 
@@ -135,10 +135,10 @@ export default function OccupantMobile({
 
     // Automatically trigger CRITICAL status on fall sensors
     if (newVal) {
-      onUpdateStatus(occupant.id, "CRITICAL", selectedZone, "Automatic Fall Sensor Alarm triggered.", true);
+      onUpdateStatus(occupant.id, "MEDICAL", selectedZone, "Automatic Fall Sensor Alarm triggered (OSHA 1910.38(c)(1)).", true);
       setStatusMessage("Critical telemetry sent: Fall coordinates compiled.");
     } else {
-      onUpdateStatus(occupant.id, "SAFE", selectedZone, undefined, false);
+      onUpdateStatus(occupant.id, "ACCOUNTED", selectedZone, undefined, false);
       setStatusMessage("Fall status reset safe.");
     }
   };
@@ -172,17 +172,23 @@ export default function OccupantMobile({
       </div>
 
       {/* Active evacuation notification block */}
-      <div className="mt-1 bg-red-950/90 border border-red-500/30 p-3 rounded-2xl mb-3 text-xs flex flex-col gap-2">
+      <div className="mt-1 bg-red-950/90 border border-red-500/30 p-3 rounded-2xl mb-3 text-sm flex flex-col gap-2">
         <div className="flex items-start gap-2">
           <Flame className="text-red-500 shrink-0 mt-0.5" size={16} />
           <div className="flex-1">
-            <div className="font-bold text-red-200 uppercase tracking-wider text-[11px]">🔔 EVACUATE FLOOR 7 (Pilot)</div>
+           <div className="font-bold text-red-200 uppercase tracking-wider text-[11px]">🔔 EVACUATE FLOOR 7 (Pilot)</div>
             <div className="text-red-350 text-[10px] leading-relaxed mt-0.5">
-              Hazard: OFFICE FIRE. Use Stair A (North). 
-              {stairBBlocked ? (
-                <span className="text-yellow-400 font-bold block mt-1">⚠️ STAIR B IS BLOCKED! Dynamic Reroute Plan Active.</span>
+              Hazard: OFFICE FIRE. {occupant.mobilityImpaired ? (
+                <span className="text-blue-300 font-bold block mt-1">♿ MOBILITY-IMPAIRED: Proceed to nearest Area of Rescue Assistance (ARA). DO NOT use stairwells.</span>
               ) : (
-                " Stair B (South) is also clear."
+                <>
+                  Use Stair A (North).
+                  {stairBBlocked ? (
+                    <span className="text-yellow-400 font-bold block mt-1">⚠️ STAIR B IS BLOCKED! Dynamic Reroute Plan Active.</span>
+                  ) : (
+                    " Stair B (South) is also clear."
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -217,7 +223,7 @@ export default function OccupantMobile({
           }`}
           id="btn-nav-qr-pass"
         >
-          <span className={`w-1.5 h-1.5 rounded-full bg-amber-400 ${occupant.status !== "SAFE" ? "animate-ping" : ""} inline-block`} />
+          <span className={`w-1.5 h-1.5 rounded-full bg-amber-400 ${occupant.status !== "ACCOUNTED" ? "animate-ping" : ""} inline-block`} />
           Muster QR Pass
         </button>
       </div>
@@ -229,7 +235,7 @@ export default function OccupantMobile({
           <>
             <div className="text-center py-2 bg-gray-900/60 rounded-xl border border-gray-800">
               <div className="text-[10px] uppercase font-mono tracking-widest text-gray-400">Personal Token ID</div>
-              <div className="text-base font-bold text-slate-100 font-mono">{occupant.id}</div>
+              <div className="text-lg font-bold text-slate-100 font-mono">{occupant.id}</div>
               <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded bg-gray-800 text-[9px] text-gray-400 border border-gray-700">
                 <ShieldCheck size={10} className="text-emerald-500" /> Layer 5 Tokenization
               </div>
@@ -246,7 +252,7 @@ export default function OccupantMobile({
                   placeholder="e.g. NW112233"
                   value={badgeInput}
                   onChange={(e) => setBadgeInput(e.target.value.toUpperCase())}
-                  className="w-full bg-gray-950 border border-gray-800 rounded px-2 py-1 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full bg-gray-950 border border-gray-800 rounded px-2 py-1 text-sm text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
                 <p className="text-[9px] text-gray-500 mt-0.5">Required for physical validation checks.</p>
               </div>
@@ -257,7 +263,7 @@ export default function OccupantMobile({
                   placeholder="FSD notes (script tags stripped)..."
                   value={alertNote}
                   onChange={(e) => setAlertNote(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded px-2 py-1 text-xs text-white h-12 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
+                  className="w-full bg-gray-950 border border-gray-800 rounded px-2 py-1 text-sm text-white h-12 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
                 />
               </div>
             </div>
@@ -311,7 +317,7 @@ export default function OccupantMobile({
                   <Activity className={`${isFallSensorEnabled ? "text-red-500 animate-pulse" : "text-emerald-500"}`} size={16} />
                   <div>
                     <span className="text-[10px] block text-gray-400 font-mono">Tilt / Accel Sensor</span>
-                    <span className="text-xs font-bold font-mono text-gray-200">{isFallSensorEnabled ? "0.1G / IMPACT ALERT" : "1.0G (STABLE)"}</span>
+                    <span className="text-sm font-bold font-mono text-gray-200">{isFallSensorEnabled ? "0.1G / IMPACT ALERT" : "1.0G (STABLE)"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -355,9 +361,9 @@ export default function OccupantMobile({
                       key={`${rIdx}-${cIdx}`}
                       className={`w-[11.5px] h-[11.5px] rounded-[1px] transition-colors duration-300 ${
                         active 
-                          ? occupant.status === "SAFE" 
+                          ? occupant.status === "ACCOUNTED" 
                             ? "bg-slate-950" 
-                            : occupant.status === "CRITICAL"
+                            : occupant.status === "MEDICAL"
                             ? "bg-red-950"
                             : "bg-amber-950"
                           : "bg-white"
@@ -396,8 +402,9 @@ export default function OccupantMobile({
               <div className="flex justify-between">
                 <span className="text-gray-500">Current Status:</span>
                 <span className={`font-bold uppercase ${
-                  occupant.status === "SAFE" ? "text-emerald-400" :
-                  occupant.status === "CRITICAL" ? "text-red-400 animate-pulse" : "text-amber-400"
+                  occupant.status === "ACCOUNTED" ? "text-emerald-400" :
+                  occupant.status === "MEDICAL" ? "text-red-400 animate-pulse" :
+                  occupant.status === "ARA_STAGING" ? "text-blue-400" : "text-amber-400"
                 }`}>{occupant.status}</span>
               </div>
 
@@ -413,8 +420,8 @@ export default function OccupantMobile({
             {/* Quick Simulation check-in trigger */}
             <button
               onClick={() => {
-                onUpdateStatus(occupant.id, "SAFE", selectedZone, `QR code scanned at Muster Station Terminal (Zone: ${selectedZone})`, false);
-                setStatusMessage(`Quick Check-In Success! Dynamic QR validation code recognized at Muster Gate ${selectedZone}. Mark SAFE logged to chain.`);
+                onUpdateStatus(occupant.id, "ACCOUNTED", selectedZone, `QR code scanned at Muster Station Terminal (Zone: ${selectedZone})`, false);
+                setStatusMessage(`Quick Check-In Success! QR validated at Muster Gate ${selectedZone}. Marked ACCOUNTED.`);
                 setActiveScreen("FORM");
               }}
               className="w-full bg-slate-800 hover:bg-slate-750 text-slate-100 font-mono text-[10px] py-2 border border-slate-700 hover:border-slate-650 rounded-xl font-bold uppercase transition-all tracking-wider active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
@@ -450,12 +457,12 @@ export default function OccupantMobile({
           onClick={() => {
             onUpdateStatus(
               occupant.id,
-              "CRITICAL",
+              "MEDICAL",
               selectedZone,
               "🚨 AUTOMATIC SOS PANIC! Active device alarm triggered by occupant.",
               true
             );
-            setStatusMessage("⚠️ EMERGENCY SOS BROADCAST SENT IN MESH PACKETS!");
+            setStatusMessage("⚠️ EMERGENCY SOS BROADCAST SENT!");
           }}
           className="w-full bg-red-750 hover:bg-red-850 text-white font-mono text-[11px] py-3 border border-red-500/50 hover:border-red-400 rounded-xl font-bold uppercase transition-all tracking-wider active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.4)]"
           id="btn-sos-panic"
@@ -466,15 +473,15 @@ export default function OccupantMobile({
 
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => handleCheckIn("SAFE")}
+            onClick={() => handleCheckIn("ACCOUNTED")}
             className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/40 text-[11px] font-bold text-white py-2.5 px-3 rounded-xl flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 cursor-pointer"
             id="btn-evac-safe"
           >
             <CheckCircle size={13} />
-            I AM SAFE
+            {occupant.mobilityImpaired ? "AT ARA" : "I AM SAFE"}
           </button>
           <button
-            onClick={() => handleCheckIn("NEED_HELP")}
+            onClick={() => handleCheckIn("MEDICAL")}
             className="bg-red-600 hover:bg-red-500 border border-red-400/40 text-[11px] font-bold text-white py-2.5 px-3 rounded-xl flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 animate-pulse cursor-pointer"
             id="btn-evac-help"
           >

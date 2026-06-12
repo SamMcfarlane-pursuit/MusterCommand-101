@@ -177,7 +177,7 @@ export default function FSDCommandCenter({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Headcount & Locator System States
-  const [locatorTab, setLocatorTab] = useState<"ALL" | "AT_RISK" | "SAFE">("ALL");
+  const [locatorTab, setLocatorTab] = useState<"ALL" | "AT_RISK" | "ACCOUNTED">("ALL");
   const [locatorSector, setLocatorSector] = useState<"ALL" | "NW" | "NE" | "SW" | "SE" | "Center">("ALL");
   const [locatorPage, setLocatorPage] = useState(1);
   const [fsdSearchQuery, setFsdSearchQuery] = useState("");
@@ -238,10 +238,12 @@ export default function FSDCommandCenter({
   // Generate compliance FDNY reports (NYC LL26 Rs-17 Audit checklist)
   const generateFdnyReport = () => {
     const uniqueTimeStr = new Date().toUTCString();
-    const safeCount = occupants.filter(o => o.status === "SAFE").length;
-    const criticalCount = occupants.filter(o => o.status === "CRITICAL").length;
-    const needHelpCount = occupants.filter(o => o.status === "NEED_HELP").length;
+    const safeCount = occupants.filter(o => o.status === "ACCOUNTED").length;
+    const criticalCount = occupants.filter(o => o.status === "MEDICAL" && o.fallDetected).length;
+    const needHelpCount = occupants.filter(o => o.status === "MEDICAL" && !o.fallDetected).length;
+    const araCount = occupants.filter(o => o.status === "ARA_STAGING").length;
     const missingCount = occupants.filter(o => o.status === "MISSING").length;
+    const drillRate = Math.round((occupants.filter(o => o.drillParticipant !== false).length / occupants.length) * 100);
 
     const formattedReport = `================================================================================
 MUSTERCOMMAND LIFE-SAFETY COMPLIANCE AUDIT CERTIFICATE
@@ -258,9 +260,11 @@ NETWORK LINK TYPE  : ${isBlackout ? "HMAC Bluetooth Mesh - Backup Gateway" : "Pr
 --------------------------------------------------------------------------------
 TOTAL ON-SITE ROSTER REGISTRATION : ${occupants.length} personnel
 DECIPHERED AS SAFE (ACCOUNTED)    : ${safeCount} 
+STAGED AT AREA OF RESCUE (ARA)    : ${araCount}
 DECLARED UNACCOUNTED (MISSING)    : ${missingCount}
 REPORTED PHYSICAL DISTRESS (MIA)  : ${needHelpCount}
 CRITICAL TELEMETRY FALL INJURY    : ${criticalCount}
+OSHA 1910.38(e) DRILL PARTICIPATION: ${drillRate}% COMPLIANT
 
 --------------------------------------------------------------------------------
 2. COMPLIANCE SIGNATURE & INTEGRITY CHAIN (VERIFIED IN-MEMORY LEDGER)
@@ -280,16 +284,16 @@ MusterCommand OS Integration Engine
   };
 
   // Sort by DANGER LEVEL > PROXIMITY (Section 8.3 Wireframe)
-  // Danger Weight: CRITICAL = 3, NEED_HELP = 2, MISSING = 1, SAFE = 0.
+  // Danger Weight: MEDICAL = 3, ARA_STAGING = 2, MISSING = 1, ACCOUNTED = 0.
   const getDangerWeight = (status: Occupant["status"]) => {
-    if (status === "CRITICAL") return 3;
-    if (status === "NEED_HELP") return 2;
+    if (status === "MEDICAL") return 3;
+    if (status === "ARA_STAGING") return 2;
     if (status === "MISSING") return 1;
     return 0;
   };
 
   const sortedRedList = [...occupants]
-    .filter(o => o.status !== "SAFE")
+    .filter(o => o.status !== "ACCOUNTED")
     .sort((a, b) => {
       const wa = getDangerWeight(a.status);
       const wb = getDangerWeight(b.status);
@@ -301,8 +305,8 @@ MusterCommand OS Integration Engine
   const filteredLocatorOccupants = [...occupants]
     .filter(o => {
       // 1. Tab Status Filter
-      if (locatorTab === "AT_RISK" && o.status === "SAFE") return false;
-      if (locatorTab === "SAFE" && o.status !== "SAFE") return false;
+      if (locatorTab === "AT_RISK" && o.status === "ACCOUNTED") return false;
+      if (locatorTab === "ACCOUNTED" && o.status !== "ACCOUNTED") return false;
       
       // 2. Sector Filter
       if (locatorSector !== "ALL" && o.quadrant !== locatorSector) return false;
@@ -344,7 +348,7 @@ MusterCommand OS Integration Engine
             <span className="bg-red-600 text-white font-bold text-[10px] uppercase font-mono px-2 py-0.5 rounded tracking-widest animate-pulse">
               INCIDENT ACTIVE
             </span>
-            <h2 className="text-lg font-bold tracking-tight text-slate-100 font-sans">
+            <h2 className="text-xl font-bold tracking-tight text-slate-100 font-sans">
               MusterCommand <span className="text-slate-400 font-normal">Command Center</span>
             </h2>
           </div>
@@ -364,7 +368,7 @@ MusterCommand OS Integration Engine
               setElapsedSeconds(0);
               onLogEvent("FSD manually reset the incident elapsed timer.");
             }}
-            className="bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-slate-600 text-slate-300 font-bold text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
+            className="bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-slate-600 text-slate-300 font-bold text-sm py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
             id="btn-fsd-reset-timer"
           >
             <RefreshCw size={12} className="text-amber-500" />
@@ -372,7 +376,7 @@ MusterCommand OS Integration Engine
           </button>
           <button
             onClick={onToggleStairB}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-mono font-bold border transition-all ${
               stairBBlocked 
                 ? "bg-yellow-950 text-yellow-400 border-yellow-700" 
                 : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-755"
@@ -386,7 +390,7 @@ MusterCommand OS Integration Engine
                 onClearIncident();
               }
             }}
-            className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 text-white font-bold text-xs py-1.5 px-4 rounded-lg flex items-center gap-1 transition-all active:scale-95"
+            className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 text-white font-bold text-sm py-1.5 px-4 rounded-lg flex items-center gap-1 transition-all active:scale-95"
           >
             <CheckCircle size={13} />
             DECLARE CLEAR
@@ -405,7 +409,7 @@ MusterCommand OS Integration Engine
                 <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Emergency Hazard</span>
                 <Flame className="text-red-500 animate-pulse" size={14} />
               </div>
-              <p className="text-sm font-bold text-slate-100 uppercase font-sans">OFFICE FIRE IN NE SECTOR</p>
+              <p className="text-base font-bold text-slate-100 uppercase font-sans">OFFICE FIRE IN NE SECTOR</p>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Floor 7 Breakroom, electrical box failure.</p>
             </div>
 
@@ -519,7 +523,7 @@ MusterCommand OS Integration Engine
           <div className="flex justify-between items-center mb-2">
             <div>
               <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Interactive Architectural Map</span>
-              <h3 className="text-xs font-bold text-slate-200 uppercase font-sans">Floor 7 Pilot Plan (4 Irving Plaza)</h3>
+              <h3 className="text-sm font-bold text-slate-200 uppercase font-sans">Floor 7 Pilot Plan (4 Irving Plaza)</h3>
             </div>
             <span className="text-[10px] bg-indigo-950 text-indigo-400 px-1.5 rounded font-mono">
               RS-17 Compliant
@@ -620,18 +624,18 @@ MusterCommand OS Integration Engine
 
                 return (
                   <g key={occ.id} className="transition-all duration-500">
-                    <circle
-                      cx={coord.x}
-                      cy={coord.y}
-                      r="6.5"
-                      fill={
-                        occ.status === "SAFE" ? "#10b981" :
-                        occ.status === "CRITICAL" ? "#ef4444" :
-                        occ.status === "NEED_HELP" ? "#f59e0b" : "#94a3b8"
-                      }
-                      stroke="#0f172a"
-                      strokeWidth="1.2"
-                    />
+                      <circle
+                        cx={coord.x}
+                        cy={coord.y}
+                        r="6.5"
+                        fill={
+                          occ.status === "ACCOUNTED" ? "#10b981" :
+                          occ.status === "MEDICAL" ? "#ef4444" :
+                          occ.status === "ARA_STAGING" ? "#3b82f6" : "#94a3b8"
+                        }
+                        stroke="#0f172a"
+                        strokeWidth="1.2"
+                      />
                     <text x={coord.x} y={coord.y - 9} fill="#cbd5e1" fontSize="5.5" fontFamily="monospace" textAnchor="middle">
                       {occ.id.replace("usr_", "")}
                     </text>
@@ -642,9 +646,9 @@ MusterCommand OS Integration Engine
 
             {/* Map Legend Overlay */}
             <div className="absolute bottom-2 left-2 flex flex-wrap gap-2.5 bg-slate-900/90 p-1.5 rounded-lg border border-slate-800 text-[8px] font-mono text-slate-300">
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"/> Accounted Safe</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"/> Need Help</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"/> Critical (Fall)</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"/> Accounted</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"/> ARA Staging</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"/> Medical/Fall</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"/> Missing</span>
             </div>
           </div>
@@ -661,12 +665,12 @@ MusterCommand OS Integration Engine
             
             {/* Header Telemetry */}
             <div className="flex justify-between items-center mb-2 shrink-0">
-              <h3 className="text-xs font-mono tracking-wider text-slate-300 uppercase font-bold flex items-center gap-1">
+              <h3 className="text-sm font-mono tracking-wider text-slate-300 uppercase font-bold flex items-center gap-1">
                 <MapPin size={12} className="text-amber-500 animate-pulse" />
                 <span>Headcount & Locator</span>
               </h3>
               <span className="text-[9px] bg-slate-900 border border-slate-800 text-slate-300 px-2 py-0.5 rounded-lg font-mono font-medium">
-                {occupants.filter(o => o.status === "SAFE").length} / {occupants.length} ACCOUNTED
+                {occupants.filter(o => o.status === "ACCOUNTED").length} / {occupants.length} ACCOUNTED
               </span>
             </div>
 
@@ -686,7 +690,7 @@ MusterCommand OS Integration Engine
 
             {/* Category tabs */}
             <div className="grid grid-cols-3 gap-1 mb-2 bg-slate-900/40 p-1 rounded-xl border border-slate-850 shrink-0 select-none">
-              {(["ALL", "AT_RISK", "SAFE"] as const).map(tab => (
+              {(["ALL", "AT_RISK", "ACCOUNTED"] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -697,13 +701,13 @@ MusterCommand OS Integration Engine
                     locatorTab === tab
                       ? tab === "AT_RISK"
                         ? "bg-red-950/60 text-red-400 border border-red-900/40"
-                        : tab === "SAFE"
+                        : tab === "ACCOUNTED"
                         ? "bg-emerald-950/60 text-emerald-400 border border-emerald-900/40"
                         : "bg-slate-800 text-white border border-slate-700"
                       : "text-slate-400 hover:text-slate-250 cursor-pointer"
                   }`}
                 >
-                  {tab === "ALL" ? "ALL ROSTER" : tab === "AT_RISK" ? "MIA/AT RISK" : "SAFE"}
+                  {tab === "ALL" ? "ALL ROSTER" : tab === "AT_RISK" ? "MIA/AT RISK" : "ACCOUNTED"}
                 </button>
               ))}
             </div>
@@ -737,11 +741,11 @@ MusterCommand OS Integration Engine
                     className={`p-2 rounded-xl border flex flex-col justify-between transition-all ${
                       o.id === unsealedTokenId
                         ? "bg-slate-900 border-amber-500/70 shadow-lg"
-                        : o.status === "CRITICAL"
+                        : o.status === "MEDICAL"
                         ? "bg-red-950/20 border-red-900/50 hover:bg-red-900/10"
-                        : o.status === "NEED_HELP"
-                        ? "bg-amber-950/20 border-amber-900/40 hover:bg-amber-900/10"
-                        : o.status === "SAFE"
+                        : o.status === "ARA_STAGING"
+                        ? "bg-blue-950/20 border-blue-900/40 hover:bg-blue-900/10"
+                        : o.status === "ACCOUNTED"
                         ? "bg-emerald-950/15 border-emerald-900/30 hover:bg-emerald-900/10"
                         : "bg-slate-900/40 border-slate-850 hover:bg-slate-850/50"
                     }`}
@@ -750,15 +754,15 @@ MusterCommand OS Integration Engine
                       <div className="flex gap-2">
                         <div className="mt-1 shrink-0">
                           <span className={`relative flex h-2 w-2`}>
-                            {o.status !== "SAFE" && (
+                            {o.status !== "ACCOUNTED" && (
                               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                                o.status === "CRITICAL" ? "bg-red-400" : "bg-amber-400"
+                                o.status === "MEDICAL" ? "bg-red-400" : "bg-blue-400"
                               }`} />
                             )}
                             <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                              o.status === "SAFE" ? "bg-emerald-500" :
-                              o.status === "CRITICAL" ? "bg-red-500" :
-                              o.status === "NEED_HELP" ? "bg-amber-400" : "bg-slate-500"
+                              o.status === "ACCOUNTED" ? "bg-emerald-500" :
+                              o.status === "MEDICAL" ? "bg-red-500" :
+                              o.status === "ARA_STAGING" ? "bg-blue-400" : "bg-slate-500"
                             }`} />
                           </span>
                         </div>
@@ -875,7 +879,7 @@ MusterCommand OS Integration Engine
           <div className="border-t border-slate-850 pt-3 mt-3 shrink-0">
             <button
               onClick={generateFdnyReport}
-              className="w-full bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-100 text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+              className="w-full bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-100 text-sm font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
             >
               <FileText size={14} className="text-amber-500" />
               GENERATE PRE-ARRIVAL FDNY REPORT
@@ -896,7 +900,7 @@ MusterCommand OS Integration Engine
             <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2 shrink-0 select-none">
               <div className="flex items-center gap-1.5">
                 <Layers className="text-amber-500 animate-pulse" size={13} />
-                <span className="text-xs font-bold tracking-tight text-slate-200">EH&S FEASIBILITY DISCOVERY ROADMAP</span>
+                <span className="text-sm font-bold tracking-tight text-slate-200">EH&S FEASIBILITY DISCOVERY ROADMAP</span>
               </div>
               <span className="text-[8px] bg-indigo-950/80 text-indigo-400 border border-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
                 6-WEEK DRILL LIFE-CYCLE
@@ -1045,7 +1049,7 @@ MusterCommand OS Integration Engine
           <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-3">
             <div className="flex items-center gap-1.5">
               <Database className="text-amber-500" size={15} />
-              <span className="text-xs font-bold tracking-tight text-slate-200">HASH-CHAINED SECURE AUDIT LEDGER</span>
+              <span className="text-sm font-bold tracking-tight text-slate-200">HASH-CHAINED SECURE AUDIT LEDGER</span>
             </div>
             {ledgerIntegrity.verified ? (
               <span className="text-[8px] bg-emerald-950 text-emerald-400 border border-emerald-900 px-1.5 py-0.2 rounded font-mono font-bold flex items-center gap-0.5">
@@ -1111,10 +1115,10 @@ MusterCommand OS Integration Engine
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col h-[520px]">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
-              <h3 className="text-sm font-bold text-slate-200">Legal Compliance Pre-Arrival Report</h3>
+              <h3 className="text-base font-bold text-slate-200">Legal Compliance Pre-Arrival Report</h3>
               <button
                 onClick={() => setFdnyReport(null)}
-                className="text-xs bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-white px-2 py-1 rounded"
+                className="text-sm bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-white px-2 py-1 rounded"
               >
                 Close Report
               </button>

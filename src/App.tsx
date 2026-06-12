@@ -5,7 +5,8 @@ import { clientSHA256, createNextBlock, sanitizeText } from "./utils";
 import OccupantMobile from "./components/OccupantMobile";
 import WardenTablet from "./components/WardenTablet";
 import FSDCommandCenter from "./components/FSDCommandCenter";
-import { ShieldCheck, Eye, EyeOff, Radio, Lock, RefreshCw, AlertOctagon, Activity, Grid, Maximize2, Minimize2, Smartphone, Tablet, Monitor } from "lucide-react";
+import SignInGateway from "./components/SignInGateway";
+import { ShieldCheck, Eye, EyeOff, Radio, Lock, RefreshCw, AlertOctagon, Activity, Grid, Maximize2, Minimize2, Smartphone, Tablet, Monitor, LogOut } from "lucide-react";
 
 export default function App() {
   // Occupants roster (Tokenized at Rest)
@@ -15,6 +16,10 @@ export default function App() {
 
   // View mode switcher: ALL (Split screen), OCCUPANT, WARDEN, FSD
   const [viewMode, setViewMode] = useState<"ALL" | "OCCUPANT" | "WARDEN" | "FSD">("ALL");
+
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authUser, setAuthUser] = useState<any>(null);
   
   // Incident Master Operations
   const [isBlackout, setIsBlackout] = useState(false);
@@ -22,7 +27,7 @@ export default function App() {
   const [isLedgerTampered, setIsLedgerTampered] = useState(false);
   
   // NYC F-89 Emergency Broadcast Directive State
-  const [activeDirective, setActiveDirective] = useState<string>("Phase 1 Evacuation: NE Office Fire hazard detected. NW and SE core team wardens sweep stairwells. Reroute SW occupants via Stair A.");
+  const [activeDirective, setActiveDirective] = useState<string>("Phase 1 Evacuation: NE Office Fire hazard detected. F-58 Wardens sweep assigned quadrants. ARA occupants stage at designated rescue areas. Reroute SW occupants via Stair A.");
 
   const handleDispatchDirective = async (newDirective: string) => {
     setActiveDirective(newDirective);
@@ -220,9 +225,29 @@ export default function App() {
     setMeshQueue([]);
     setStairBBlocked(false);
     setIsLedgerTampered(false);
-    setActiveDirective("Phase 1 Evacuation: NE Office Fire hazard detected. NW and SE core team wardens sweep stairwells. Reroute SW occupants via Stair A.");
-    logEvent("🟢 Fire safety declared CLEAR. Drill successfully closed. Metrics archived.");
+    setActiveDirective("Phase 1 Evacuation: NE Office Fire hazard detected. F-58 Wardens sweep assigned quadrants. Reroute SW occupants via Stair A.");
+    logEvent("🟢 Fire safety declared CLEAR. Drill successfully closed. Metrics archived per OSHA 1910.38(e).");
   };
+
+  const handleAuthenticated = (profile: any) => {
+    setAuthUser(profile);
+    setIsAuthenticated(true);
+    
+    // Auto-route based on vault role
+    if (profile.role.includes("FSD")) {
+      setViewMode("FSD");
+    } else if (profile.role.includes("Warden")) {
+      setViewMode("WARDEN");
+    } else {
+      setViewMode("OCCUPANT");
+    }
+    
+    logEvent(`🔐 Secure Login: ${profile.name} (${profile.role}) authenticated successfully via Vault JIT decryption.`);
+  };
+
+  if (!isAuthenticated) {
+    return <SignInGateway onAuthenticated={handleAuthenticated} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased">
@@ -237,7 +262,7 @@ export default function App() {
                 <Radio className="animate-spin text-orange-400" size={18} />
               </span>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-white font-sans flex items-center gap-1.5">
+                <h1 className="text-2xl font-bold tracking-tight text-white font-sans flex items-center gap-1.5">
                   MusterCommand
                   <span className="text-[10px] font-mono tracking-widest bg-slate-800 text-slate-300 font-bold border border-slate-700 px-1.5 py-0.2 rounded">
                     PHASE 1 - FLOOR 7 PILOT
@@ -254,7 +279,7 @@ export default function App() {
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             
             {/* Blackout toggle */}
-            <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800 text-xs w-full sm:w-auto">
+            <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800 text-sm w-full sm:w-auto">
               <span className="text-slate-400 font-mono text-[10px] uppercase tracking-wider pl-1.5 flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${isBlackout ? "bg-yellow-500 animate-pulse" : "bg-emerald-500"}`} />
                 <span>Simulation Mesh Blackout</span>
@@ -280,6 +305,19 @@ export default function App() {
               <span>VAULT RE-ENCRYPTION KEY ROTATING</span>
             </div>
 
+            {/* Logout Button */}
+            <button
+              onClick={() => {
+                setIsAuthenticated(false);
+                setAuthUser(null);
+                setViewMode("ALL");
+              }}
+              className="flex items-center gap-2 bg-red-950/50 hover:bg-red-900 border border-red-900/50 text-red-400 hover:text-white px-3 py-1.5 rounded-xl text-sm font-mono transition-all ml-2"
+            >
+              <LogOut size={14} />
+              <span>LOGOUT</span>
+            </button>
+
           </div>
 
         </div>
@@ -287,7 +325,7 @@ export default function App() {
 
       {/* Central Interactive View Switcher Toolbar - Let users press and go in each */}
       <div className="bg-slate-900/85 border-b border-slate-800/80 py-3 px-4 sticky top-[73px] z-20 backdrop-blur-md select-none">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm font-mono">
           <div className="flex items-center gap-2 text-slate-400">
             <span className="text-amber-500 font-bold">👁️ SELECT PERSPECTIVE:</span>
             <span className="hidden md:inline">Click any option or card header below to focus full screen:</span>
@@ -502,7 +540,7 @@ export default function App() {
 
         {/* Real-time systems logs terminal under the dashboard grids */}
         <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-          <div className="flex justify-between items-center pb-2.5 border-b border-slate-900 mb-3 text-xs font-mono">
+          <div className="flex justify-between items-center pb-2.5 border-b border-slate-900 mb-3 text-sm font-mono">
             <span className="text-slate-400 font-bold uppercase tracking-widest text-[9.5px]">SYSTEMS LIFE-SAFETY LOGS CONSOLE</span>
             <span className="text-slate-500 text-[9px]">Continuous Cryptographic Audit Thread</span>
           </div>
