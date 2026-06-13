@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle, AlertTriangle, Play, HelpCircle, FileText, Send, Sparkles, RefreshCw, Layers, ShieldCheck, Database, Flame, Clock, Trash2, ShieldX, ChevronLeft, ChevronRight, MapPin, Unlock } from "lucide-react";
 import { Occupant, LedgerBlock, DrillHistoryItem } from "../types";
+import FloorMap from "./FloorMap";
 
 interface FSDCommandCenterProps {
   occupants: Occupant[];
@@ -520,142 +521,17 @@ MusterCommand OS Integration Engine
 
         {/* PANEL 2: MAP & DYNAMIC REROUTING (4 Columns) */}
         <div className="xl:col-span-5 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col overflow-hidden">
-          <div className="flex justify-between items-center mb-2">
-            <div>
-              <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Interactive Architectural Map</span>
-              <h3 className="text-sm font-bold text-slate-200 uppercase font-sans">Floor 7 Pilot Plan (4 Irving Plaza)</h3>
-            </div>
-            <span className="text-[10px] bg-indigo-950 text-indigo-400 px-1.5 rounded font-mono">
-              RS-17 Compliant
-            </span>
-          </div>
-
-          {/* Interactive architectural Floor SVG */}
-          <div className="flex-1 bg-slate-950 rounded-xl border border-slate-850 p-2 relative flex items-center justify-center min-h-[220px]">
-            <svg viewBox="0 0 400 300" className="w-full h-full max-h-[280px]">
-              
-              {/* Grid Background */}
-              <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0f172a" strokeWidth="1" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-
-              {/* Floor Plan Border */}
-              <rect x="15" y="15" width="370" height="270" rx="12" fill="none" stroke="#334155" strokeWidth="2.5" />
-
-              {/* Interior Quadrant Dividers */}
-              <line x1="200" y1="15" x2="200" y2="285" stroke="#1e293b" strokeWidth="1.5" strokeDasharray="4 4" />
-              <line x1="15" y1="150" x2="385" y2="150" stroke="#1e293b" strokeWidth="1.5" strokeDasharray="4 4" />
-
-              {/* Zones labels */}
-              <text x="50" y="35" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">NW QUADRANT</text>
-              <text x="270" y="35" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">NE QUADRANT</text>
-              <text x="50" y="275" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">SW QUADRANT</text>
-              <text x="270" y="275" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">SE QUADRANT</text>
-              
-              {/* Fire Hazard indicator near NE Area */}
-              <circle cx="310" cy="110" r="16" fill="#7f1d1d" fillOpacity="0.4" />
-              <circle cx="310" cy="110" r="8" fill="#ef4444" fillOpacity="0.8" className="animate-ping" />
-              <text x="310" y="114" fill="#fef08a" fontSize="8" fontWeight="bold" textAnchor="middle">FIRE</text>
-
-              {/* Stair A - North Landing (Top Left) */}
-              <g className="cursor-pointer">
-                <rect x="25" y="45" width="60" height="35" rx="5" fill="#022c22" stroke="#059669" strokeWidth="1.5" />
-                <text x="55" y="60" fill="#a7f3d0" fontSize="8" fontWeight="bold" textAnchor="middle">STAIR A</text>
-                <text x="55" y="72" fill="#34d399" fontSize="7" fontFamily="monospace" textAnchor="middle">NORTH (CLEAR)</text>
-              </g>
-
-              {/* Stair B - South Landing (Bottom Right) */}
-              <g onClick={onToggleStairB} className="cursor-pointer transition-all">
-                <rect
-                  x="305"
-                  y="215"
-                  width="60"
-                  height="35"
-                  rx="5"
-                  fill={stairBBlocked ? "#450a0a" : "#022c22"}
-                  stroke={stairBBlocked ? "#ef4444" : "#059669"}
-                  strokeWidth="1.5"
-                />
-                <text x="335" y="230" fill={stairBBlocked ? "#fecaca" : "#a7f3d0"} fontSize="8" fontWeight="bold" textAnchor="middle">STAIR B</text>
-                <text
-                  x="335"
-                  y="242"
-                  fill={stairBBlocked ? "#fca5a5" : "#34d399"}
-                  fontSize="7"
-                  fontFamily="monospace"
-                  textAnchor="middle"
-                  className={stairBBlocked ? "font-bold" : ""}
-                >
-                  {stairBBlocked ? "BLOCKED ⚠️" : "SOUTH (CLEAR)"}
-                </text>
-              </g>
-
-              {/* Area of Rescue Assistance x4 */}
-              {[
-                { x: 30, y: 135, label: "ARA NW" },
-                { x: 340, y: 135, label: "ARA NE" },
-                { x: 30, y: 165, label: "ARA SW" },
-                { x: 340, y: 165, label: "ARA SE" }
-              ].map((ara, index) => (
-                <g key={index}>
-                  <rect x={ara.x} y={ara.y} width="35" height="15" rx="2" fill="#172554" stroke="#3b82f6" strokeWidth="1" />
-                  <text x={ara.x + 17} y={ara.y + 10} fill="#93c5fd" fontSize="6.5" fontWeight="bold" textAnchor="middle">{ara.label}</text>
-                </g>
-              ))}
-
-              {/* Occupants dynamically plotted based on quadrant */}
-              {occupants.map((occ) => {
-                // Return dynamic plotting coordinate vectors
-                let coord = { x: 200, y: 150 };
-                if (occ.quadrant === "NW") {
-                  coord = occ.id === "usr_a7f8c9d1" ? { x: 95, y: 105 } : { x: 130, y: 70 };
-                } else if (occ.quadrant === "NE") {
-                  coord = { x: 240, y: 100 };
-                } else if (occ.quadrant === "SW") {
-                  coord = { x: 120, y: 210 };
-                } else if (occ.quadrant === "SE") {
-                  coord = { x: 280, y: 180 };
-                } else {
-                  coord = occ.id === "usr_d4e3f2a1" ? { x: 180, y: 140 } : { x: 210, y: 135 };
-                }
-
-                return (
-                  <g key={occ.id} className="transition-all duration-500">
-                      <circle
-                        cx={coord.x}
-                        cy={coord.y}
-                        r="6.5"
-                        fill={
-                          occ.status === "ACCOUNTED" ? "#10b981" :
-                          occ.status === "MEDICAL" ? "#ef4444" :
-                          occ.status === "ARA_STAGING" ? "#3b82f6" : "#94a3b8"
-                        }
-                        stroke="#0f172a"
-                        strokeWidth="1.2"
-                      />
-                    <text x={coord.x} y={coord.y - 9} fill="#cbd5e1" fontSize="5.5" fontFamily="monospace" textAnchor="middle">
-                      {occ.id.replace("usr_", "")}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-
-            {/* Map Legend Overlay */}
-            <div className="absolute bottom-2 left-2 flex flex-wrap gap-2.5 bg-slate-900/90 p-1.5 rounded-lg border border-slate-800 text-[8px] font-mono text-slate-300">
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"/> Accounted</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"/> ARA Staging</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"/> Medical/Fall</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"/> Missing</span>
-            </div>
-          </div>
-
-          <p className="text-[9px] text-slate-400 mt-2 font-mono">
-            * Stair B registers blockages on-click. Dynamic mesh notifications auto-dispatch reroute alerts over bluetooth.
-          </p>
+          <FloorMap
+            occupants={occupants}
+            stairBBlocked={stairBBlocked}
+            onToggleStairB={onToggleStairB}
+            onOccupantClick={(occ) => handleUnsealFsd(occ.id)}
+            selectedQuadrant={locatorSector === "ALL" ? null : locatorSector}
+            onQuadrantClick={(quad) => {
+              setLocatorSector(quad as any);
+              setLocatorPage(1);
+            }}
+          />
         </div>
 
         {/* PANEL 3: HEADCOUNT & DYNAMIC LOCATOR BOARD */}

@@ -40,7 +40,14 @@ export default function SignInGateway({ onAuthenticated }: SignInGatewayProps) {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeQuickLogin, setActiveQuickLogin] = useState<string | null>(null);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricRegistered, setBiometricRegistered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Check for biometric availability and registration
+  useEffect(() => {
+    checkBiometricSupport();
+  }, []);
 
   // Auto-focus input for rapid RFID scanner entry
   useEffect(() => {
@@ -48,6 +55,24 @@ export default function SignInGateway({ onAuthenticated }: SignInGatewayProps) {
       inputRef.current.focus();
     }
   }, []);
+
+  const checkBiometricSupport = async () => {
+    // Check if WebAuthn is supported
+    if (window.PublicKeyCredential &&
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+      try {
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        setBiometricAvailable(available);
+
+        // Check if user has registered biometric credentials
+        const registered = localStorage.getItem('biometric_registered');
+        setBiometricRegistered(!!registered);
+      } catch (err) {
+        console.log("Biometric check failed:", err);
+        setBiometricAvailable(false);
+      }
+    }
+  };
 
   const handleAuthenticate = async (tokenOverride?: string) => {
     const token = tokenOverride || employeeId.trim();
@@ -93,6 +118,106 @@ export default function SignInGateway({ onAuthenticated }: SignInGatewayProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleAuthenticate();
+  };
+
+  const handleBiometricRegister = async () => {
+    if (!biometricAvailable) return;
+
+    setIsAuthenticating(true);
+    setError(null);
+
+    try {
+      // Generate a challenge (in production this would come from server)
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      // Create credential
+      const publicKey: PublicKeyCredentialCreationOptions = {
+        challenge: challenge,
+        rp: {
+          name: "MusterCommand",
+          id: window.location.hostname,
+        },
+        user: {
+          id: new Uint8Array(16),
+          name: employeeId || "demo_user",
+          displayName: "Demo User",
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: "public-key" },  // ES256
+          { alg: -257, type: "public-key" } // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          userVerification: "required",
+        },
+        timeout: 60000,
+        attestation: "none",
+      };
+
+      const credential = await navigator.credentials.create({ publicKey });
+
+      if (credential) {
+        // Store credential ID and mark as registered
+        localStorage.setItem('biometric_registered', 'true');
+        localStorage.setItem('biometric_user_token', employeeId || 'demo_user');
+        setBiometricRegistered(true);
+        setIsAuthenticating(false);
+
+        // Auto-authenticate after registration
+        setTimeout(() => {
+          handleAuthenticate(employeeId || undefined);
+        }, 500);
+      }
+    } catch (err: any) {
+      setIsAuthenticating(false);
+      if (err.name === 'NotAllowedError') {
+        setError("Biometric registration cancelled");
+      } else {
+        setError("Biometric registration failed: " + err.message);
+      }
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (!biometricAvailable || !biometricRegistered) return;
+
+    setIsAuthenticating(true);
+    setError(null);
+
+    try {
+      // Generate a challenge (in production this would come from server)
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      // Request authentication
+      const publicKey: PublicKeyCredentialRequestOptions = {
+        challenge: challenge,
+        timeout: 60000,
+        userVerification: "required",
+        rpId: window.location.hostname,
+      };
+
+      const credential = await navigator.credentials.get({ publicKey });
+
+      if (credential) {
+        // Retrieve stored user token
+        const storedToken = localStorage.getItem('biometric_user_token');
+        if (storedToken) {
+          handleAuthenticate(storedToken);
+        } else {
+          // Fallback to first demo profile
+          handleAuthenticate('usr_b3c7d6e5');
+        }
+      }
+    } catch (err: any) {
+      setIsAuthenticating(false);
+      if (err.name === 'NotAllowedError') {
+        setError("Biometric authentication cancelled");
+      } else {
+        setError("Biometric authentication failed: " + err.message);
+      }
+    }
   };
 
   return (
@@ -205,6 +330,50 @@ export default function SignInGateway({ onAuthenticated }: SignInGatewayProps) {
               <span>AUTHENTICATE</span>
             )}
           </button>
+
+          {/* Biometric Authentication Section */}
+          {biometricAvailable && (
+            <>
+              <div className="w-full flex items-center gap-3 mt-2">
+                <div className="flex-1 h-px bg-slate-800" />
+                <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">biometric auth</span>
+                <div className="flex-1 h-px bg-slate-800" />
+              </div>
+
+              {biometricRegistered ? (
+                <button
+                  type="button"
+                  onClick={handleBiometricLogin}
+                  disabled={isAuthenticating}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xl py-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] cursor-pointer"
+                >
+                  {isAuthenticating ? (
+                    <>
+                      <Loader2 className="animate-spin" size={24} />
+                      <span>VERIFYING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Fingerprint size={24} />
+                      <span>USE FINGERPRINT</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleBiometricRegister}
+                  disabled={isAuthenticating || !employeeId.trim()}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-500 hover:from-blue-500 hover:to-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xl py-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] cursor-pointer"
+                >
+                  <>
+                    <Fingerprint size={24} />
+                    <span>REGISTER FINGERPRINT</span>
+                  </>
+                </button>
+              )}
+            </>
+          )}
         </form>
 
         <div className="mt-8 relative">
@@ -218,6 +387,9 @@ export default function SignInGateway({ onAuthenticated }: SignInGatewayProps) {
 
       <div className="absolute bottom-6 text-center text-[10px] text-slate-500 font-mono space-y-1">
         <p>Vault Tokens: usr_d4e3f2a1 (FSD) • usr_a7f8c9d1 (Warden) • usr_b3c7d6e5 (Occupant)</p>
+        {biometricAvailable && (
+          <p className="text-emerald-500">🔒 Biometric Authentication {biometricRegistered ? 'Enabled' : 'Available'}</p>
+        )}
         <p className="text-slate-600">ConEdison Floor 7 Pilot • 4 Irving Plaza, New York NY</p>
       </div>
 
