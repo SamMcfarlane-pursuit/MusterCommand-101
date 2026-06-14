@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Occupant } from "../types";
-import { ZoomIn, ZoomOut, Maximize2, AlertTriangle, Users, MapPin } from "lucide-react";
+import { Users, MapPin, Activity } from "lucide-react";
 
 interface FloorMapProps {
   occupants: Occupant[];
@@ -19,12 +19,11 @@ export default function FloorMap({
   selectedQuadrant,
   onQuadrantClick
 }: FloorMapProps) {
-  const [hoveredOccupant, setHoveredOccupant] = useState<string | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const [hoveredQuadrant, setHoveredQuadrant] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"MAP" | "LIST">("MAP");
 
   const quadrants = ["NW", "NE", "SW", "SE"];
-  
+
   const getQuadrantOccupants = (quadrant: string) => {
     return occupants.filter(o => o.quadrant === quadrant);
   };
@@ -38,80 +37,63 @@ export default function FloorMap({
     return { total: quadOccupants.length, accounted, medical, ara, missing };
   };
 
-  const getOccupantCoords = (occ: Occupant) => {
-    // Improved distribution algorithm for better spacing
-    const baseCoords: Record<string, {x: number, y: number}[]> = {
-      NW: [
-        { x: 95, y: 70 }, { x: 130, y: 70 }, { x: 95, y: 105 }, { x: 130, y: 105 },
-        { x: 110, y: 85 }, { x: 150, y: 85 }, { x: 75, y: 90 }
-      ],
-      NE: [
-        { x: 240, y: 70 }, { x: 280, y: 70 }, { x: 260, y: 100 }, { x: 300, y: 100 },
-        { x: 260, y: 85 }, { x: 320, y: 85 }
-      ],
-      SW: [
-        { x: 95, y: 195 }, { x: 130, y: 195 }, { x: 120, y: 230 }, { x: 150, y: 220 },
-        { x: 80, y: 215 }
-      ],
-      SE: [
-        { x: 240, y: 195 }, { x: 280, y: 195 }, { x: 260, y: 230 }, { x: 300, y: 220 },
-        { x: 240, y: 215 }
-      ],
-      Center: [
-        { x: 180, y: 140 }, { x: 210, y: 140 }, { x: 195, y: 160 }
-      ]
-    };
-
-    const quadCoords = baseCoords[occ.quadrant] || baseCoords.Center;
-    const index = occupants.filter(o => o.quadrant === occ.quadrant).indexOf(occ);
-    return quadCoords[index % quadCoords.length] || quadCoords[0];
+  // Get color intensity based on status breakdown
+  const getQuadrantColor = (quadrant: string) => {
+    const stats = getQuadrantStats(quadrant);
+    if (stats.medical > 0) return "rgba(239, 68, 68, 0.3)"; // Red for medical
+    if (stats.missing > 0) return "rgba(245, 158, 11, 0.25)"; // Amber for missing
+    if (stats.ara > 0) return "rgba(59, 130, 246, 0.2)"; // Blue for ARA
+    if (stats.accounted === stats.total) return "rgba(16, 185, 129, 0.15)"; // Green for all safe
+    return "rgba(100, 116, 139, 0.1)"; // Gray neutral
   };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Map Header with Controls */}
+      {/* Map Header with View Toggle */}
       <div className="flex justify-between items-center mb-2 shrink-0">
         <div>
-          <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Interactive Architectural Map</span>
-          <h3 className="text-sm font-bold text-slate-200 uppercase font-sans">Floor 7 Pilot Plan (4 Irving Plaza)</h3>
+          <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Floor 7 - 4 Irving Plaza</span>
+          <h3 className="text-sm font-bold text-slate-200 uppercase font-sans flex items-center gap-2">
+            <Users size={14} className="text-amber-500" />
+            {occupants.length} Total Occupants
+          </h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] bg-indigo-950 text-indigo-400 px-1.5 rounded font-mono">
             RS-17 Compliant
           </span>
-          <div className="flex gap-0.5">
+          <div className="flex gap-0.5 bg-slate-900 rounded p-0.5">
             <button
-              onClick={() => setZoomLevel(Math.max(0.8, zoomLevel - 0.2))}
-              className="p-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded text-slate-400 hover:text-white transition-all"
-              title="Zoom Out"
+              type="button"
+              onClick={() => setViewMode("MAP")}
+              className={`px-2 py-1 text-[10px] font-mono font-bold rounded transition-all ${
+                viewMode === "MAP"
+                  ? "bg-amber-600 text-slate-950"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
             >
-              <ZoomOut size={14} />
+              MAP
             </button>
             <button
-              onClick={() => setZoomLevel(Math.min(1.5, zoomLevel + 0.2))}
-              className="p-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded text-slate-400 hover:text-white transition-all"
-              title="Zoom In"
+              type="button"
+              onClick={() => setViewMode("LIST")}
+              className={`px-2 py-1 text-[10px] font-mono font-bold rounded transition-all ${
+                viewMode === "LIST"
+                  ? "bg-amber-600 text-slate-950"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
             >
-              <ZoomIn size={14} />
-            </button>
-            <button
-              onClick={() => setZoomLevel(1)}
-              className="p-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded text-slate-400 hover:text-white transition-all"
-              title="Reset Zoom"
-            >
-              <Maximize2 size={14} />
+              LIST
             </button>
           </div>
         </div>
       </div>
 
-      {/* Map Container */}
-      <div className="flex-1 bg-slate-950 rounded-xl border border-slate-850 p-2 relative flex items-center justify-center overflow-hidden min-h-[320px]">
-        <svg 
-          viewBox="0 0 400 300" 
-          className="w-full h-full transition-transform duration-300"
-          style={{ transform: `scale(${zoomLevel})`, maxHeight: '420px' }}
-        >
+      {viewMode === "MAP" ? (
+        <>
+      {/* Simplified Map Container - No Zoom, Clear Overview */}
+      <div className="flex-1 bg-slate-950 rounded-xl border border-slate-850 p-3 relative overflow-hidden min-h-[320px]">
+        <svg viewBox="0 0 400 300" className="w-full h-full">
           {/* Grid Background */}
           <defs>
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -325,116 +307,194 @@ export default function FloorMap({
             </>
           )}
 
-          {/* Occupants dynamically plotted with enhanced visuals */}
-          {occupants.map((occ) => {
-            const coord = getOccupantCoords(occ);
-            const isHovered = hoveredOccupant === occ.id;
+          {/* DENSITY VISUALIZATION - Clear view for 200-400 people */}
+          {quadrants.map(quad => {
+            const stats = getQuadrantStats(quad);
+
+            // Position for density display in each quadrant center
+            const positions: Record<string, {x: number, y: number}> = {
+              NW: { x: 107, y: 92 },
+              NE: { x: 292, y: 92 },
+              SW: { x: 107, y: 217 },
+              SE: { x: 292, y: 217 }
+            };
+
+            const pos = positions[quad];
+
+            if (stats.total === 0) return null;
+
+            // Size circle based on density (but cap it)
+            const circleRadius = Math.max(20, Math.min(50, stats.total * 0.4));
 
             return (
-              <g
-                key={occ.id}
-                className="transition-all duration-300 cursor-pointer"
-                onMouseEnter={() => setHoveredOccupant(occ.id)}
-                onMouseLeave={() => setHoveredOccupant(null)}
-                onClick={() => onOccupantClick && onOccupantClick(occ)}
-              >
-                {/* Occupant status ring */}
-                {isHovered && (
-                  <circle
-                    cx={coord.x}
-                    cy={coord.y}
-                    r="10"
-                    fill="none"
-                    stroke="#fbbf24"
-                    strokeWidth="1.5"
-                    opacity="0.6"
-                  />
-                )}
-
-                {/* Occupant dot */}
+              <g key={quad}>
+                {/* Heat map background circle */}
                 <circle
-                  cx={coord.x}
-                  cy={coord.y}
-                  r={isHovered ? "8" : "6.5"}
-                  fill={
-                    occ.status === "ACCOUNTED" ? "#10b981" :
-                    occ.status === "MEDICAL" ? "#ef4444" :
-                    occ.status === "ARA_STAGING" ? "#3b82f6" : "#94a3b8"
-                  }
-                  stroke={isHovered ? "#fbbf24" : "#0f172a"}
-                  strokeWidth={isHovered ? "2" : "1.2"}
-                  filter={occ.status === "MEDICAL" ? "url(#glow)" : "none"}
-                  className={occ.status === "MEDICAL" ? "animate-pulse" : ""}
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={circleRadius}
+                  fill={getQuadrantColor(quad)}
+                  opacity="0.5"
+                  className="transition-all"
                 />
 
-                {/* Occupant ID label */}
-                <text
-                  x={coord.x}
-                  y={coord.y - 11}
-                  fill={isHovered ? "#fbbf24" : "#cbd5e1"}
-                  fontSize={isHovered ? "6.5" : "5.5"}
-                  fontFamily="monospace"
-                  textAnchor="middle"
-                  fontWeight={isHovered ? "bold" : "normal"}
-                >
-                  {occ.id.replace("usr_", "")}
-                </text>
+                {/* Central count display */}
+                <g transform={`translate(${pos.x}, ${pos.y})`}>
+                  <circle r="24" fill="#0f172a" opacity="0.95" stroke="#475569" strokeWidth="1.5" />
 
-                {/* Hover tooltip */}
-                {isHovered && (
-                  <g transform={`translate(${coord.x + 15}, ${coord.y - 25})`}>
-                    <rect
-                      x="0"
-                      y="0"
-                      width="80"
-                      height="35"
-                      rx="4"
-                      fill="#1e293b"
-                      stroke="#475569"
-                      strokeWidth="1"
-                      opacity="0.95"
-                    />
-                    <text x="5" y="10" fill="#f1f5f9" fontSize="6" fontWeight="bold">
-                      {occ.nameEncrypted}
-                    </text>
-                    <text x="5" y="18" fill="#cbd5e1" fontSize="5">
-                      Role: {occ.role}
-                    </text>
-                    <text x="5" y="25" fill="#94a3b8" fontSize="5">
-                      Badge: {occ.badgeId}
-                    </text>
-                    <text x="5" y="32" fill={
-                      occ.status === "ACCOUNTED" ? "#10b981" :
-                      occ.status === "MEDICAL" ? "#ef4444" :
-                      occ.status === "ARA_STAGING" ? "#3b82f6" : "#94a3b8"
-                    } fontSize="5.5" fontWeight="bold">
-                      Status: {occ.status}
-                    </text>
-                  </g>
-                )}
+                  {/* Total count - Large and bold */}
+                  <text y="-3" fill="#e2e8f0" fontSize="18" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+                    {stats.total}
+                  </text>
+
+                  {/* Status breakdown - Compact */}
+                  <text y="8" fill="#94a3b8" fontSize="6" textAnchor="middle" fontFamily="monospace">
+                    {stats.accounted > 0 && `✓${stats.accounted} `}
+                    {stats.medical > 0 && `⚕${stats.medical} `}
+                    {stats.missing > 0 && `?${stats.missing}`}
+                  </text>
+
+                  {/* Quadrant label */}
+                  <text y="16" fill="#64748b" fontSize="5.5" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+                    {quad}
+                  </text>
+                </g>
               </g>
             );
           })}
 
-          {/* Legend */}
-          <g transform="translate(15, 260)">
-            <text x="0" y="0" fill="#64748b" fontSize="5.5" fontWeight="bold" fontFamily="monospace">
+          {/* Updated Legend - Density Mode */}
+          <g transform="translate(15, 265)">
+            <text x="0" y="0" fill="#64748b" fontSize="6" fontWeight="bold" fontFamily="monospace">
               LEGEND:
             </text>
-            <circle cx="28" cy="-2" r="3" fill="#10b981" />
-            <text x="33" y="0" fill="#94a3b8" fontSize="5">Accounted</text>
+            <circle cx="30" cy="-2" r="4" fill="#10b981" />
+            <text x="37" y="1" fill="#10b981" fontSize="5.5" fontWeight="bold">✓ Safe</text>
 
-            <circle cx="65" cy="-2" r="3" fill="#ef4444" />
-            <text x="70" y="0" fill="#94a3b8" fontSize="5">Medical</text>
+            <circle cx="70" cy="-2" r="4" fill="#ef4444" />
+            <text x="77" y="1" fill="#ef4444" fontSize="5.5" fontWeight="bold">⚕ Medical</text>
 
-            <circle cx="98" cy="-2" r="3" fill="#3b82f6" />
-            <text x="103" y="0" fill="#94a3b8" fontSize="5">ARA</text>
+            <circle cx="120" cy="-2" r="4" fill="#3b82f6" />
+            <text x="127" y="1" fill="#3b82f6" fontSize="5.5" fontWeight="bold">♿ ARA</text>
 
-            <circle cx="122" cy="-2" r="3" fill="#94a3b8" />
-            <text x="127" y="0" fill="#94a3b8" fontSize="5">Missing</text>
+            <circle cx="165" cy="-2" r="4" fill="#f59e0b" />
+            <text x="172" y="1" fill="#f59e0b" fontSize="5.5" fontWeight="bold">? Missing</text>
+
+            <text x="220" y="1" fill="#475569" fontSize="5" fontFamily="monospace">
+              | DENSITY VIEW (200-400 capacity)
+            </text>
           </g>
         </svg>
       </div>
+      </>
+      ) : (
+        /* LIST VIEW - Detailed breakdown for all occupants */
+        <div className="flex-1 bg-slate-950 rounded-xl border border-slate-850 overflow-hidden">
+          <div className="h-full overflow-y-auto p-3 space-y-2">
+            {quadrants.map(quad => {
+              const quadOccupants = getQuadrantOccupants(quad);
+              const stats = getQuadrantStats(quad);
+
+              if (quadOccupants.length === 0) return null;
+
+              return (
+                <div key={quad} className="space-y-1">
+                  {/* Quadrant Header */}
+                  <div
+                    className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
+                      selectedQuadrant === quad
+                        ? "bg-amber-950/30 border-amber-600"
+                        : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
+                    }`}
+                    onClick={() => onQuadrantClick && onQuadrantClick(quad)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} className="text-amber-500" />
+                      <span className="text-sm font-bold text-slate-200 font-mono">{quad} QUADRANT</span>
+                      <span className="text-[10px] text-slate-500">
+                        ({stats.total} {stats.total === 1 ? 'person' : 'people'})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px]">
+                      {stats.accounted > 0 && (
+                        <span className="bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded font-mono">
+                          ✓ {stats.accounted}
+                        </span>
+                      )}
+                      {stats.medical > 0 && (
+                        <span className="bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-mono animate-pulse">
+                          ⚕ {stats.medical}
+                        </span>
+                      )}
+                      {stats.ara > 0 && (
+                        <span className="bg-blue-950 text-blue-400 px-1.5 py-0.5 rounded font-mono">
+                          ♿ {stats.ara}
+                        </span>
+                      )}
+                      {stats.missing > 0 && (
+                        <span className="bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-mono">
+                          ? {stats.missing}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Occupant List - Only show if quadrant is selected or if there are issues */}
+                  {(selectedQuadrant === quad || stats.medical > 0 || stats.missing > 0) && (
+                    <div className="ml-4 space-y-1">
+                      {quadOccupants
+                        .filter(occ =>
+                          selectedQuadrant === quad ||
+                          occ.status === "MEDICAL" ||
+                          occ.status === "MISSING"
+                        )
+                        .slice(0, 20) // Show max 20 in list to prevent overwhelming UI
+                        .map(occ => (
+                          <button
+                            type="button"
+                            key={occ.id}
+                            onClick={() => onOccupantClick && onOccupantClick(occ)}
+                            className="w-full flex items-center justify-between p-1.5 rounded bg-slate-900/30 border border-slate-800/50 hover:border-slate-700 hover:bg-slate-900/60 transition-all text-left"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Activity
+                                size={10}
+                                className={
+                                  occ.status === "ACCOUNTED" ? "text-emerald-500" :
+                                  occ.status === "MEDICAL" ? "text-red-500 animate-pulse" :
+                                  occ.status === "ARA_STAGING" ? "text-blue-500" : "text-amber-500"
+                                }
+                              />
+                              <span className="text-[10px] text-slate-300 font-mono">{occ.badgeId}</span>
+                              <span className="text-[10px] text-slate-400">{occ.role}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {occ.mobilityImpaired && (
+                                <span className="text-[9px] text-blue-400">♿</span>
+                              )}
+                              <span className={`text-[9px] font-bold font-mono ${
+                                occ.status === "ACCOUNTED" ? "text-emerald-500" :
+                                occ.status === "MEDICAL" ? "text-red-500" :
+                                occ.status === "ARA_STAGING" ? "text-blue-500" : "text-amber-500"
+                              }`}>
+                                {occ.status}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      {quadOccupants.length > 20 && selectedQuadrant === quad && (
+                        <div className="text-[9px] text-slate-500 text-center py-1 font-mono">
+                          ... and {quadOccupants.length - 20} more (use FSD Locator panel for full list)
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Quick Stats Bar */}
       <div className="mt-2 grid grid-cols-4 gap-1.5 shrink-0">
@@ -444,6 +504,7 @@ export default function FloorMap({
 
           return (
             <button
+              type="button"
               key={quad}
               onClick={() => onQuadrantClick && onQuadrantClick(quad)}
               className={`p-1.5 rounded-lg border transition-all text-left ${

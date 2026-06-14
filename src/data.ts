@@ -1,14 +1,14 @@
-import { Occupant, LedgerBlock } from "./types";
+import { Occupant, LedgerBlock, Quadrant, OccupantStatus } from "./types";
 
 // ============================================================================
 // Floor 7 Pilot Roster — 4 Irving Plaza, ConEdison HQ
-// ~200 daytime occupants across 4 quadrants (Engineering, Comms & Gov Affairs, Legal, IT)
-// This seed represents a representative pilot cohort of 12 individuals
-// including F-89 FSD, F-58 Wardens, standard occupants, contractors, visitors,
-// and mobility-impaired individuals requiring ARA staging.
+// Full daytime occupancy across 4 quadrants (Engineering, Comms & Gov Affairs, Legal, IT).
+// KEY_OCCUPANTS holds 12 hand-authored personnel covering the scripted edge cases
+// (F-89 FSD, F-58 Wardens, contractors, visitors, fall detection, ARA staging).
+// A generated cohort then scales the roster to ~300 to validate high-density flows.
 // ============================================================================
 
-export const INITIAL_OCCUPANTS: Occupant[] = [
+const KEY_OCCUPANTS: Occupant[] = [
   // F-89 Fire Safety Director — on-duty certified (NYC LL26 requirement)
   {
     id: "usr_d4e3f2a1",
@@ -188,6 +188,59 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     drillParticipant: false
   }
 ];
+
+// ============================================================================
+// High-Density Roster Generator
+// Fills the Floor 7 pilot to a realistic full-occupancy load (~300 people) so the
+// FloorMap density visualization and FSD accountability flows can be validated at
+// scale. The 12 hand-authored KEY_OCCUPANTS above carry the scripted edge cases;
+// the generated cohort below provides representative volume per quadrant.
+// ============================================================================
+
+const FILLER_QUADRANTS: Quadrant[] = ["NW", "NE", "SW", "SE"];
+const FILLER_INITIALS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "R", "S", "T", "W"];
+
+// Deterministic pseudo-random so the roster is stable across reloads.
+function seededRandom(seed: number): () => number {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return () => (s = (s * 16807) % 2147483647) / 2147483647;
+}
+
+function generateRoster(count: number): Occupant[] {
+  const rand = seededRandom(7);
+  const roster: Occupant[] = [];
+  for (let i = 0; i < count; i++) {
+    const quadrant = FILLER_QUADRANTS[i % FILLER_QUADRANTS.length];
+    const r = rand();
+    // ~78% accounted, ~12% missing, ~6% ARA, ~4% medical
+    const status: OccupantStatus =
+      r < 0.78 ? "ACCOUNTED" : r < 0.90 ? "MISSING" : r < 0.96 ? "ARA_STAGING" : "MEDICAL";
+    const mobilityImpaired = status === "ARA_STAGING";
+    const fi = FILLER_INITIALS[Math.floor(rand() * FILLER_INITIALS.length)];
+    const li = FILLER_INITIALS[Math.floor(rand() * FILLER_INITIALS.length)];
+    const serial = String(100000 + i).slice(-6);
+    roster.push({
+      id: `usr_gen${serial}`,
+      badgeId: `${quadrant}${serial}`,
+      nameEncrypted: `${fi}••••• ${li}•••`,
+      role: "Occupant",
+      status,
+      quadrant,
+      staircase: quadrant === "NE" || quadrant === "SE" ? "Stair B" : "Stair A",
+      musterZone: "Zone A",
+      lastSeen: "10:0" + (i % 10) + " AM",
+      fallDetected: false,
+      mobilityImpaired,
+      isAtARA: status === "ARA_STAGING",
+      drillParticipant: status !== "MISSING"
+    });
+  }
+  return roster;
+}
+
+// Combined full-occupancy roster: 12 scripted key personnel + ~288 generated.
+export const INITIAL_OCCUPANTS: Occupant[] = [...KEY_OCCUPANTS, ...generateRoster(288)];
 
 // Seed ledger blocks (Hash-Chained Ledger — OSHA 1910.38(c)(4) digital headcount)
 export const SEED_LEDGER: LedgerBlock[] = [
