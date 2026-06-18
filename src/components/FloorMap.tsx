@@ -119,11 +119,11 @@ export default function FloorMap({
       <div className="flex justify-between items-center mb-2 shrink-0">
         <div>
           <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">
-            4 Irving Plaza • Floor 7
+            Get to Know Your Building · 4 Irving Plaza
           </span>
           <h3 className="text-sm font-bold text-slate-200 uppercase font-sans flex items-center gap-2">
             <Users size={14} className="text-amber-500" />
-            {occupants.length} Total Occupants
+            {occupants.length} Occupants · Floor 7
           </h3>
         </div>
         <div className="flex items-center gap-2">
