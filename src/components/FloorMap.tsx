@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Occupant } from "../types";
 import {
   Users,
@@ -89,10 +89,23 @@ export default function FloorMap({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
-  // When a real building-plan photo is dropped at public/building-plan.png it is
-  // shown as the map; otherwise we fall back to the drawn schematic.
-  const [planImgError, setPlanImgError] = useState(false);
+  // Show a real building-plan photo (public/building-plan.png) when present;
+  // otherwise fall back to the drawn schematic. We preload it with an Image()
+  // because the dev/prod SPA fallback returns index.html (HTTP 200, text/html)
+  // for a missing file — only a genuinely decodable image flips this to true.
+  const [hasPhoto, setHasPhoto] = useState(false);
   const dragRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setHasPhoto(true);
+    img.onerror = () => setHasPhoto(false);
+    img.src = "/building-plan.png";
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, []);
 
   const clampZoom = (z: number) => Math.max(1, Math.min(3, z));
   const zoomIn = () => setZoom((z) => clampZoom(z * 1.25));
@@ -914,8 +927,9 @@ export default function FloorMap({
                 })}
 
                 {/* Real FDNY building-plan photo overlay (drop the file at
-                    public/building-plan.png; it pans/zooms with the map). */}
-                {!planImgError && (
+                    public/building-plan.png; it pans/zooms with the map). Only
+                    rendered once the image is confirmed decodable. */}
+                {hasPhoto && (
                   <>
                     <rect
                       x="0"
@@ -933,7 +947,6 @@ export default function FloorMap({
                       height="300"
                       preserveAspectRatio="xMidYMid meet"
                       style={{ pointerEvents: "none" }}
-                      onError={() => setPlanImgError(true)}
                     />
                   </>
                 )}
