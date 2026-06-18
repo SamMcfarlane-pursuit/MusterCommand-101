@@ -143,6 +143,21 @@ export default function FloorMap({
     setPan({ x: 0, y: 0 });
   };
 
+  // Zoom/center the map onto a quadrant so command can track a wing at a glance.
+  const focusQuadrant = (quad: string) => {
+    const centers: Record<string, { x: number; y: number }> = {
+      NW: { x: 133, y: 90 },
+      NE: { x: 283, y: 90 },
+      SW: { x: 133, y: 209 },
+      SE: { x: 283, y: 209 },
+    };
+    const c = centers[quad];
+    if (!c) return;
+    const nz = 2.2;
+    setZoom(nz);
+    setPan({ x: 200 - nz * c.x, y: 150 - nz * c.y });
+  };
+
   const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
     setZoom((z) => clampZoom(z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
   };
@@ -250,7 +265,9 @@ export default function FloorMap({
           <div
             ref={mapBoxRef}
             className={`w-full bg-slate-950 border border-slate-850 p-2 relative overflow-hidden ${
-              isFullscreen ? "h-full rounded-none" : "aspect-[4/3] rounded-xl"
+              isFullscreen
+                ? "h-full rounded-none"
+                : "flex-1 min-h-[300px] rounded-xl"
             }`}
           >
             {/* Quadrant status pills (tap to filter) */}
@@ -262,7 +279,10 @@ export default function FloorMap({
                   <button
                     type="button"
                     key={`pill-${q}`}
-                    onClick={() => onQuadrantClick && onQuadrantClick(q)}
+                    onClick={() => {
+                      onQuadrantClick && onQuadrantClick(q);
+                      focusQuadrant(q);
+                    }}
                     className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-mono transition-all cursor-pointer ${
                       selectedQuadrant === q
                         ? "bg-amber-950/80 border-amber-600"
@@ -534,7 +554,10 @@ export default function FloorMap({
                       key={quad}
                       onMouseEnter={() => setHoveredQuadrant(quad)}
                       onMouseLeave={() => setHoveredQuadrant(null)}
-                      onClick={() => onQuadrantClick && onQuadrantClick(quad)}
+                      onClick={() => {
+                        onQuadrantClick && onQuadrantClick(quad);
+                        focusQuadrant(quad);
+                      }}
                       className="cursor-pointer"
                     >
                       <rect
@@ -650,6 +673,7 @@ export default function FloorMap({
                     onClick={(e) => {
                       e.stopPropagation();
                       onQuadrantClick && onQuadrantClick(bank.quad);
+                      focusQuadrant(bank.quad);
                     }}
                     className="cursor-pointer"
                   >
@@ -1006,7 +1030,8 @@ export default function FloorMap({
 
             {/* Interaction hint */}
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 text-[8px] font-mono text-slate-500 bg-slate-950/70 px-2 py-0.5 rounded-full border border-slate-850 whitespace-nowrap pointer-events-none">
-              Scroll / pinch to zoom · drag to pan · tap a bank to filter
+              Scroll to zoom · drag to pan · tap a wing/bank to zoom & track · ⤢
+              full screen
             </div>
           </div>
 
