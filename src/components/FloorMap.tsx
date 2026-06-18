@@ -88,7 +88,8 @@ export default function FloorMap({
   // Pan / zoom state for the building plan.
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const mapBoxRef = useRef<HTMLDivElement>(null);
   // Show a real building-plan photo (public/building-plan.png) when present;
   // otherwise fall back to the drawn schematic. We preload it with an Image()
   // because the dev/prod SPA fallback returns index.html (HTTP 200, text/html)
@@ -106,6 +107,26 @@ export default function FloorMap({
       img.onerror = null;
     };
   }, []);
+
+  // Native full-screen for the map (edge-to-edge, stays fully interactive).
+  useEffect(() => {
+    const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
+  const toggleFullscreen = () => {
+    const el = mapBoxRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else if (el.requestFullscreen) {
+      el.requestFullscreen();
+    } else {
+      // Fallback for browsers without the Fullscreen API.
+      setIsFullscreen((v) => !v);
+    }
+  };
 
   const clampZoom = (z: number) => Math.max(1, Math.min(3, z));
   const zoomIn = () => setZoom((z) => clampZoom(z * 1.25));
@@ -225,8 +246,9 @@ export default function FloorMap({
         <>
           {/* Building Plan — modeled on the FDNY "Get to Know Your Building" sheet */}
           <div
-            className={`w-full bg-slate-950 rounded-xl border border-slate-850 p-2 relative overflow-hidden ${
-              isExpanded ? "aspect-[3/2]" : "aspect-[4/3]"
+            ref={mapBoxRef}
+            className={`w-full bg-slate-950 border border-slate-850 p-2 relative overflow-hidden ${
+              isFullscreen ? "h-full rounded-none" : "aspect-[4/3] rounded-xl"
             }`}
           >
             {/* Quadrant status pills (tap to filter) */}
@@ -277,11 +299,15 @@ export default function FloorMap({
               </button>
               <button
                 type="button"
-                onClick={() => setIsExpanded((v) => !v)}
+                onClick={toggleFullscreen}
                 className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-white hover:border-slate-500 transition-all cursor-pointer"
-                title={isExpanded ? "Shrink map" : "Expand map"}
+                title={isFullscreen ? "Exit full screen" : "Open full screen"}
               >
-                {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                {isFullscreen ? (
+                  <Minimize2 size={13} />
+                ) : (
+                  <Maximize2 size={13} />
+                )}
               </button>
               {(zoom !== 1 || pan.x !== 0 || pan.y !== 0) && (
                 <button
