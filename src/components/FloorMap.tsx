@@ -89,6 +89,9 @@ export default function FloorMap({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
+  // When a real building-plan photo is dropped at public/building-plan.png it is
+  // shown as the map; otherwise we fall back to the drawn schematic.
+  const [planImgError, setPlanImgError] = useState(false);
   const dragRef = useRef<{ x: number; y: number } | null>(null);
 
   const clampZoom = (z: number) => Math.max(1, Math.min(3, z));
@@ -909,6 +912,31 @@ export default function FloorMap({
                     </g>
                   );
                 })}
+
+                {/* Real FDNY building-plan photo overlay (drop the file at
+                    public/building-plan.png; it pans/zooms with the map). */}
+                {!planImgError && (
+                  <>
+                    <rect
+                      x="0"
+                      y="0"
+                      width="400"
+                      height="300"
+                      fill="#0b1220"
+                      style={{ pointerEvents: "none" }}
+                    />
+                    <image
+                      href="/building-plan.png"
+                      x="12"
+                      y="10"
+                      width="376"
+                      height="280"
+                      preserveAspectRatio="xMidYMid meet"
+                      style={{ pointerEvents: "none" }}
+                      onError={() => setPlanImgError(true)}
+                    />
+                  </>
+                )}
               </g>
             </svg>
 
