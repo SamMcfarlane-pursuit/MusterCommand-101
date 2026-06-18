@@ -490,7 +490,7 @@ MusterCommand OS Integration Engine
   );
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[1440px] xl:h-[710px] text-slate-100 overflow-hidden">
+    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[1700px] xl:h-[920px] text-slate-100 overflow-hidden">
       {/* Commanding Header Ribbon */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 mb-4 gap-3">
         <div>
@@ -770,7 +770,7 @@ MusterCommand OS Integration Engine
 
             <svg
               viewBox="0 0 740 500"
-              className={`w-full h-full select-none ${mapFullscreen ? "" : "max-h-[380px]"}`}
+              className="w-full h-full select-none"
               style={{
                 transform: `translate(${mapPan.x}px, ${mapPan.y}px) scale(${mapZoom})`,
                 transformOrigin: "center",
@@ -1934,7 +1934,7 @@ MusterCommand OS Integration Engine
                   drawn schematic when present so the map matches the actual sheet. */}
               {hasPlan && (
                 <>
-                  <rect x="0" y="0" width="740" height="500" fill="#f8fafc" />
+                  <rect x="0" y="0" width="740" height="500" fill="#0a0e19" />
                   <image
                     href="/building-plan.png"
                     x="0"
@@ -1947,10 +1947,26 @@ MusterCommand OS Integration Engine
               )}
 
               {/* Occupants dynamically plotted based on quadrant */}
-              {occupants.map((occ) => {
-                // Return dynamic plotting coordinate vectors matching 740x500 floor plan
+              {occupants.map((occ, idx) => {
                 let coord = { x: 370, y: 250 };
-                if (occ.id === "usr_a7f8c9d1") {
+                if (hasPlan) {
+                  // Place markers over the building footprint of the real plan
+                  // (740x500 viewBox, image letterboxed with meet). Spread
+                  // multiple occupants in a wing so the dots don't overlap.
+                  const zones: Record<string, { x: number; y: number }> = {
+                    NW: { x: 300, y: 140 },
+                    NE: { x: 490, y: 150 },
+                    SW: { x: 290, y: 330 },
+                    SE: { x: 505, y: 345 },
+                    Center: { x: 400, y: 245 },
+                  };
+                  const base = zones[occ.quadrant] || zones.Center;
+                  const ring = idx % 6;
+                  coord = {
+                    x: base.x + ((ring % 3) - 1) * 18,
+                    y: base.y + (Math.floor(ring / 3) - 0.5) * 22,
+                  };
+                } else if (occ.id === "usr_a7f8c9d1") {
                   coord = { x: 115, y: 155 }; // NW: usr_a7f8c9d1 (Warden, Safe)
                 } else if (occ.id === "usr_c1b2a3d4") {
                   coord = { x: 145, y: 95 }; // NW: usr_c1b2a3d4 (Occupant, Missing)
