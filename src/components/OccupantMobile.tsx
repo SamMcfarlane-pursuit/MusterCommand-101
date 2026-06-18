@@ -159,47 +159,18 @@ export default function OccupantMobile({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Zod manual validation & XSS sanitization
-  const handleCheckIn = (status: "ACCOUNTED" | "MEDICAL") => {
-    setValidationError(null);
-    setStatusMessage(null);
-
-    // Zod Validation Parse
+  // Send the typed message to Command without changing the occupant's status.
+  const sendNote = () => {
+    // Zod Level-1 validation (note length + badge format if one was typed).
     const result = alertFormSchema.safeParse({
       badgeId: badgeInput.toUpperCase().trim() || occupant.badgeId,
       note: alertNote,
     });
-
     if (!result.success) {
       setValidationError(result.error.issues[0].message);
       return;
     }
 
-    // Layer 1 DOMPurify alternative - stripping scripts
-    const safeNote = sanitizeText(alertNote);
-
-    onUpdateStatus(
-      occupant.id,
-      status,
-      occupant.mobilityImpaired ? undefined : selectedZone,
-      status === "MEDICAL" ? safeNote : undefined,
-      isFallSensorEnabled,
-    );
-
-    // Dynamic state messaging based on network context
-    if (isBlackout) {
-      setStatusMessage(
-        `Mesh Packets Encrypted & Broadcasted! HMAC code: ${Math.random().toString(16).substring(2, 10).toUpperCase()}`,
-      );
-    } else {
-      setStatusMessage(
-        "Status successfully logged to centralized Firestore ledger.",
-      );
-    }
-  };
-
-  // Send the typed message to Command without changing the occupant's status.
-  const sendNote = () => {
     const safe = sanitizeText(alertNote).trim();
     if (!safe) {
       setValidationError("Type a message first, then send it to Command.");
