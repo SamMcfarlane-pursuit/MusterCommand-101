@@ -128,11 +128,13 @@ export default function FloorMap({
     }
   };
 
-  const clampZoom = (z: number) => Math.max(1, Math.min(3, z));
-  const zoomIn = () => setZoom((z) => clampZoom(z * 1.25));
+  // Deep zoom (up to 8x) so a dense as-built CAD plan stays readable.
+  const MAX_ZOOM = 8;
+  const clampZoom = (z: number) => Math.max(1, Math.min(MAX_ZOOM, z));
+  const zoomIn = () => setZoom((z) => clampZoom(z * 1.4));
   const zoomOut = () =>
     setZoom((z) => {
-      const next = clampZoom(z / 1.25);
+      const next = clampZoom(z / 1.4);
       if (next === 1) setPan({ x: 0, y: 0 });
       return next;
     });
@@ -142,7 +144,7 @@ export default function FloorMap({
   };
 
   const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    setZoom((z) => clampZoom(z + (e.deltaY < 0 ? 0.2 : -0.2)));
+    setZoom((z) => clampZoom(z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
   };
   const handleDown = (e: React.MouseEvent<SVGSVGElement>) => {
     dragRef.current = { x: e.clientX, y: e.clientY };
