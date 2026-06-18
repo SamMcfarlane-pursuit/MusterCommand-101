@@ -13,7 +13,10 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     staircase: "Stair A",
     musterZone: "Zone A",
     lastSeen: "10:02 AM",
-    fallDetected: false
+    fallDetected: false,
+    drillParticipant: true,
+    nextOfKinRegistered: true,
+    nextOfKinNotified: true,
   },
   {
     id: "usr_f9e3c2b8",
@@ -23,7 +26,7 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     status: "MISSING",
     quadrant: "Center",
     lastSeen: "09:55 AM",
-    fallDetected: false
+    fallDetected: false,
   },
   {
     id: "usr_b3c7d6e5",
@@ -34,7 +37,11 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     quadrant: "NE",
     lastSeen: "10:04 AM",
     alertNote: "Fume inhalation near breakroom, assisting with mobility.",
-    fallDetected: false
+    fallDetected: false,
+    mobilityImpaired: true,
+    isAtARA: true,
+    nextOfKinRegistered: true,
+    drillParticipant: true,
   },
   {
     id: "usr_d4e3f2a1",
@@ -46,7 +53,7 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     staircase: "Stair A",
     musterZone: "Zone A",
     lastSeen: "10:00 AM",
-    fallDetected: false
+    fallDetected: false,
   },
   {
     id: "usr_c1b2a3d4",
@@ -56,7 +63,7 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     status: "MISSING",
     quadrant: "NW",
     lastSeen: "09:58 AM",
-    fallDetected: false
+    fallDetected: false,
   },
   {
     id: "usr_e5f6a7b8",
@@ -67,8 +74,41 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     quadrant: "SE",
     lastSeen: "10:05 AM",
     alertNote: "On-Device fall sensor triggered.",
-    fallDetected: true
-  }
+    fallDetected: true,
+    wearable: true,
+    nextOfKinRegistered: true,
+    drillParticipant: true,
+  },
+  {
+    id: "usr_s7t8u9v0",
+    badgeId: "SE556677",
+    nameEncrypted: "L••• T•••••",
+    role: "Occupant",
+    status: "NEED_HELP",
+    quadrant: "SE",
+    lastSeen: "10:04 AM",
+    alertNote:
+      "Crutches — staged at Area of Rescue Assistance, awaiting evac-chair.",
+    fallDetected: false,
+    mobilityImpaired: true,
+    isAtARA: true,
+    nextOfKinRegistered: true,
+    drillParticipant: true,
+  },
+  {
+    id: "usr_k9l0m1n2",
+    badgeId: "VIS00101",
+    nameEncrypted: "S••••• W••••",
+    role: "Visitor",
+    status: "MISSING",
+    quadrant: "NW",
+    lastSeen: "09:52 AM",
+    alertNote:
+      "Lobby sign-in 10 min before alarm. Lobby-issued badge VIS00101.",
+    fallDetected: false,
+    isVisitor: true,
+    drillParticipant: false,
+  },
 ];
 
 // Seed ledger blocks (Hash-Chained Ledger)
@@ -76,28 +116,46 @@ export const SEED_LEDGER: LedgerBlock[] = [
   {
     index: 0,
     timestamp: "2026-05-28T10:00:00Z",
-    event: "Alarm triggered on Floor 7 (Pilot Phase). Fire Command System online.",
-    prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
-    hash: "6e2e50550c6204b77f27af851532f83138b320876189daabc7cd23ebf90b0d62"
+    event:
+      "Alarm triggered on Floor 7 (Pilot Phase). Fire Command System online.",
+    prevHash:
+      "0000000000000000000000000000000000000000000000000000000000000000",
+    hash: "6e2e50550c6204b77f27af851532f83138b320876189daabc7cd23ebf90b0d62",
   },
   {
     index: 1,
     timestamp: "2026-05-28T10:02:15Z",
-    event: "Occupant token usr_a7f8c9d1 (Warden) scanned badge at Stair A NFC gate: SAFE.",
-    prevHash: "6e2e50550c6204b77f27af851532f83138b320876189daabc7cd23ebf90b0d62",
-    hash: "f4007bbf519ff7f99ee70bfbdfce09f6eeb62f3a469446d376ca743ec9ef906a"
+    event:
+      "Occupant token usr_a7f8c9d1 (Warden) scanned badge at Stair A NFC gate: SAFE.",
+    prevHash:
+      "6e2e50550c6204b77f27af851532f83138b320876189daabc7cd23ebf90b0d62",
+    hash: "f4007bbf519ff7f99ee70bfbdfce09f6eeb62f3a469446d376ca743ec9ef906a",
   },
   {
     index: 2,
     timestamp: "2026-05-28T10:04:10Z",
-    event: "Occupant token usr_b3c7d6e5 updated status: NEED_HELP. Fume alert logged.",
-    prevHash: "f4007bbf519ff7f99ee70bfbdfce09f6eeb62f3a469446d376ca743ec9ef906a",
-    hash: "fbbf56edbcf52ae2e2764bbf63be1da4efba293818de77678ca902bcfaaeef90"
-  }
+    event:
+      "Occupant token usr_b3c7d6e5 updated status: NEED_HELP. Fume alert logged.",
+    prevHash:
+      "f4007bbf519ff7f99ee70bfbdfce09f6eeb62f3a469446d376ca743ec9ef906a",
+    hash: "fbbf56edbcf52ae2e2764bbf63be1da4efba293818de77678ca902bcfaaeef90",
+  },
 ];
 
 export const MUSTER_ZONES = [
-  { id: "Zone A", label: "Zone A - Union Square Park", desc: "Main Assembly Area [RECOMMENDED]" },
-  { id: "Zone B", label: "Zone B - Irving Pl & 14th", desc: "Secondary South Assembly" },
-  { id: "Zone C", label: "Zone C - Irving Pl & 15th", desc: "Tertiary North Assembly" }
+  {
+    id: "Zone A",
+    label: "Zone A - Union Square Park",
+    desc: "Main Assembly Area [RECOMMENDED]",
+  },
+  {
+    id: "Zone B",
+    label: "Zone B - Irving Pl & 14th",
+    desc: "Secondary South Assembly",
+  },
+  {
+    id: "Zone C",
+    label: "Zone C - Irving Pl & 15th",
+    desc: "Tertiary North Assembly",
+  },
 ];

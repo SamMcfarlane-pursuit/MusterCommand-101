@@ -26,6 +26,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Occupant, LedgerBlock, DrillHistoryItem } from "../types";
+import { PILOT_GOALS, PilotGoalContext } from "../pilotGoals";
 
 interface FSDCommandCenterProps {
   occupants: Occupant[];
@@ -490,7 +491,7 @@ MusterCommand OS Integration Engine
   );
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[1700px] xl:h-[920px] text-slate-100 overflow-hidden">
+    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[2040px] xl:h-[1180px] text-slate-100 overflow-hidden">
       {/* Commanding Header Ribbon */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 mb-4 gap-3">
         <div>
@@ -2612,6 +2613,81 @@ MusterCommand OS Integration Engine
               🔄 SECURE RESYNC & COMPROMISE ARREST
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* PILOT SUCCESS METRICS — Floor 7 objectives scored live */}
+      <div className="mt-5 bg-slate-950/40 rounded-2xl border border-slate-800/80 p-4">
+        <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-3">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="text-amber-500" size={15} />
+            <span className="text-xs font-bold tracking-tight text-slate-200">
+              PILOT SUCCESS METRICS — FLOOR 7
+            </span>
+          </div>
+          <span className="text-[8px] bg-indigo-950/80 text-indigo-400 border border-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+            Target vs Live
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+          {PILOT_GOALS.map((g) => {
+            const pilotCtx: PilotGoalContext = {
+              occupants,
+              ledger,
+              ledgerVerified: ledgerIntegrity.verified,
+              elapsedSeconds,
+              isBlackout,
+              isDrill: true,
+            };
+            const r = g.evaluate(pilotCtx);
+            const badge =
+              r.status === "MET"
+                ? "bg-emerald-950/60 text-emerald-400 border-emerald-900/50"
+                : r.status === "AT_RISK"
+                  ? "bg-red-950/60 text-red-400 border-red-900/50"
+                  : r.status === "PENDING"
+                    ? "bg-slate-800 text-slate-400 border-slate-700"
+                    : "bg-amber-950/60 text-amber-400 border-amber-900/50";
+            const valueColor =
+              r.status === "MET"
+                ? "text-emerald-400"
+                : r.status === "AT_RISK"
+                  ? "text-red-400"
+                  : r.status === "PENDING"
+                    ? "text-slate-400"
+                    : "text-amber-400";
+            return (
+              <div
+                key={g.id}
+                className="rounded-xl border bg-slate-900/40 border-slate-850 p-2.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-[10.5px] font-bold text-slate-200 leading-tight">
+                    {g.title}
+                  </span>
+                  <span
+                    className={`text-[7.5px] font-mono font-bold px-1.5 py-0.5 rounded uppercase shrink-0 border ${badge}`}
+                  >
+                    {r.status.replace("_", " ")}
+                  </span>
+                </div>
+                <div className="text-[8.5px] text-slate-500 font-mono mt-1">
+                  🎯 {g.target}
+                  {g.stretch ? ` · stretch ${g.stretch}` : ""}
+                </div>
+                <div
+                  className={`text-[10px] font-mono font-bold mt-0.5 ${valueColor}`}
+                >
+                  {r.value}
+                </div>
+                {r.detail && (
+                  <div className="text-[8px] text-slate-500 mt-0.5 leading-tight">
+                    {r.detail}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
