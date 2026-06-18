@@ -14,6 +14,7 @@ import {
   ScanLine,
   AlertOctagon,
   MapPin,
+  Send,
 } from "lucide-react";
 import { Occupant } from "../types";
 import { sanitizeText, validateBadgeSyntax } from "../utils";
@@ -26,6 +27,29 @@ const alertFormSchema = z.object({
   }),
   note: z.string().max(200, "Notes cannot exceed 200 characters."),
 });
+
+// Each muster point maps to its optimal egress staircase so the occupant gets
+// routed the right way the moment they pick an assembly zone.
+const ZONE_STAIR: Record<
+  string,
+  { stair: "Stair A" | "Stair B"; label: string; desc: string }
+> = {
+  "Zone A": {
+    stair: "Stair A",
+    label: "Stair A (North)",
+    desc: "Primary egress — exits toward Union Square Park.",
+  },
+  "Zone B": {
+    stair: "Stair B",
+    label: "Stair B (South)",
+    desc: "Secondary egress — exits toward 14th St South.",
+  },
+  "Zone C": {
+    stair: "Stair A",
+    label: "Stair A (North)",
+    desc: "Exits toward 15th St North, nearest FDNY staging.",
+  },
+};
 
 interface OccupantMobileProps {
   occupant: Occupant;
@@ -172,6 +196,26 @@ export default function OccupantMobile({
         "Status successfully logged to centralized Firestore ledger.",
       );
     }
+  };
+
+  // Send the typed message to Command without changing the occupant's status.
+  const sendNote = () => {
+    const safe = sanitizeText(alertNote).trim();
+    if (!safe) {
+      setValidationError("Type a message first, then send it to Command.");
+      return;
+    }
+    setValidationError(null);
+    onUpdateStatus(
+      occupant.id,
+      occupant.status,
+      occupant.mobilityImpaired ? undefined : selectedZone,
+      safe,
+      isFallSensorEnabled,
+    );
+    setStatusMessage(
+      "Message sent to Command — visible on the Life-Safety log.",
+    );
   };
 
   const toggleFallSensor = () => {
@@ -345,11 +389,14 @@ export default function OccupantMobile({
                 <button
                   type="button"
                   onClick={() => {
+                    const safe = sanitizeText(alertNote).trim();
                     onUpdateStatus(
                       occupant.id,
                       "ACCOUNTED",
                       selectedZone,
-                      "Safe check-in via mobile app",
+                      safe
+                        ? `Safe check-in — ${safe}`
+                        : "Safe check-in via mobile app",
                       false,
                     );
                     setStatusMessage("✅ You are marked SAFE!");
@@ -411,11 +458,12 @@ export default function OccupantMobile({
                   <button
                     type="button"
                     onClick={() => {
+                      const safe = sanitizeText(alertNote).trim();
                       onUpdateStatus(
                         occupant.id,
                         "MEDICAL",
                         selectedZone,
-                        "Medical assistance needed",
+                        safe || "Medical assistance needed",
                         false,
                       );
                       setStatusMessage("Medical alert sent to wardens.");
@@ -476,6 +524,18 @@ export default function OccupantMobile({
                   onChange={(e) => setAlertNote(e.target.value)}
                   className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-sm text-white h-20 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
                 />
+                <button
+                  type="button"
+                  onClick={sendNote}
+                  className="w-full mt-2 py-2.5 bg-amber-600 hover:bg-amber-500 rounded-lg border border-amber-400/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-slate-950 font-bold text-sm cursor-pointer"
+                >
+                  <Send size={16} />
+                  Send Message to Command
+                </button>
+                <p className="text-[9px] text-gray-500 mt-1.5 leading-tight">
+                  Your message appears instantly on the Command Life-Safety log
+                  so a warden or FSD can attend to it.
+                </p>
               </div>
             </div>
 
@@ -493,6 +553,46 @@ export default function OccupantMobile({
                 <option value="Zone B">Zone B - 14th St South</option>
                 <option value="Zone C">Zone C - 15th St North</option>
               </select>
+
+              {/* Recommended egress staircase for the selected muster point */}
+              {ZONE_STAIR[selectedZone] &&
+                (() => {
+                  const route = ZONE_STAIR[selectedZone];
+                  const blocked = route.stair === "Stair B" && stairBBlocked;
+                  return (
+                    <div
+                      className={`mt-2 rounded-lg border p-2.5 ${
+                        blocked
+                          ? "bg-red-950/40 border-red-700/70"
+                          : "bg-emerald-950/30 border-emerald-800/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <MapPin
+                          size={13}
+                          className={
+                            blocked ? "text-red-400" : "text-emerald-400"
+                          }
+                        />
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400">
+                          Use
+                        </span>
+                        <span
+                          className={`text-sm font-black ${
+                            blocked ? "text-red-300" : "text-emerald-300"
+                          }`}
+                        >
+                          {blocked ? "Stair A (North)" : route.label}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1 leading-tight">
+                        {blocked
+                          ? "⚠ Stair B is BLOCKED — reroute to Stair A (North) immediately."
+                          : route.desc}
+                      </p>
+                    </div>
+                  );
+                })()}
             </div>
 
             {/* Fall Sensor Simulator (OSHA Compliance) */}
@@ -637,26 +737,32 @@ export default function OccupantMobile({
               </div>
             </div>
 
-            {/* Quick Simulation check-in trigger */}
+            {/* Scan the pass to sign in at the muster gate */}
             <button
               onClick={() => {
+                const safe = sanitizeText(alertNote).trim();
                 onUpdateStatus(
                   occupant.id,
                   "ACCOUNTED",
                   selectedZone,
-                  `QR code scanned at Muster Station Terminal (Zone: ${selectedZone})`,
+                  safe
+                    ? `QR muster sign-in at ${selectedZone} — ${safe}`
+                    : `QR muster sign-in at ${selectedZone}`,
                   false,
                 );
                 setStatusMessage(
-                  `Quick Check-In Success! QR validated at Muster Gate ${selectedZone}. Marked ACCOUNTED.`,
+                  `✅ Signed in via QR at Muster Gate ${selectedZone}. You are ACCOUNTED.`,
                 );
                 setActiveScreen("FORM");
               }}
-              className="w-full bg-slate-800 hover:bg-slate-750 text-slate-100 font-mono text-[10px] py-2 border border-slate-700 hover:border-slate-650 rounded-xl font-bold uppercase transition-all tracking-wider active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-sm py-3 border border-emerald-400/40 rounded-xl transition-all tracking-wide active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <QrCode size={12} className="text-amber-500" />
-              Simulate Gate Terminal scan
+              <QrCode size={16} />
+              Scan &amp; Sign In at Muster Gate
             </button>
+            <p className="text-[9px] text-gray-500 text-center leading-tight">
+              A warden can also scan this pass from their tablet to sign you in.
+            </p>
           </div>
         )}
       </div>

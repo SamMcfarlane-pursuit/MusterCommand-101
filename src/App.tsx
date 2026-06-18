@@ -209,6 +209,19 @@ export default function App() {
       minute: "2-digit",
     });
 
+    // Surface whatever the employee sent so Command can see it at a glance in the
+    // Life-Safety Logs Console and attend to it if needed.
+    const sentNote = (note || "").trim();
+    if (sentNote) {
+      const tag =
+        status === "MEDICAL"
+          ? "🚨 DISTRESS MSG"
+          : status === "ARA_STAGING"
+            ? "♿ ARA REQUEST"
+            : "📩 MESSAGE";
+      logEvent(`${tag} — ${id} @ ${zone || "floor"}: "${sentNote}"`);
+    }
+
     if (isBlackout) {
       // Offline Mesh Mode: HMAC Packet verification
       const rawText =
@@ -689,20 +702,32 @@ export default function App() {
             </span>
           </div>
           <div className="bg-black/40 rounded-xl max-h-[140px] overflow-y-auto p-3 font-mono text-[10px] text-slate-350 space-y-1 pr-1 border border-slate-900 no-scrollbar">
-            {systemLogs.map((log, index) => (
-              <div key={index} className="flex gap-2">
-                <span className="text-slate-600 select-none">&gt;</span>
-                <span
-                  className={
-                    log.includes("WARNING")
-                      ? "text-red-400 font-bold animate-pulse"
-                      : ""
-                  }
-                >
-                  {log}
-                </span>
-              </div>
-            ))}
+            {systemLogs.map((log, index) => {
+              const isCritical =
+                log.includes("WARNING") ||
+                log.includes("DISTRESS") ||
+                log.includes("🚨") ||
+                log.includes("SOS") ||
+                log.includes("EMERGENCY");
+              const isMessage =
+                log.includes("📩 MESSAGE") || log.includes("ARA REQUEST");
+              return (
+                <div key={index} className="flex gap-2">
+                  <span className="text-slate-600 select-none">&gt;</span>
+                  <span
+                    className={
+                      isCritical
+                        ? "text-red-400 font-bold animate-pulse"
+                        : isMessage
+                          ? "text-amber-300 font-semibold"
+                          : ""
+                    }
+                  >
+                    {log}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
