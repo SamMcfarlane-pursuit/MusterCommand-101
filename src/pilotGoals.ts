@@ -43,6 +43,7 @@ export interface PilotGoalContext {
   elapsedSeconds: number; // time since incident declared
   isBlackout: boolean;
   isDrill: boolean; // true = drill, false = real incident
+  records?: { drill: number; real: number }; // persisted, isolated record sets
 }
 
 export interface PilotGoalResult {
@@ -110,9 +111,7 @@ export const PILOT_GOALS: PilotGoal[] = [
       return {
         value: `${rate}% visible${isBlackout ? " (MESH)" : " (CLOUD)"}`,
         status: rate >= FLOOR7_CENSUS.meshVisibleTargetPct ? "MET" : "AT_RISK",
-        detail: isBlackout
-          ? "BLE mesh muster active"
-          : "Primary cloud link up",
+        detail: isBlackout ? "BLE mesh muster active" : "Primary cloud link up",
       };
     },
   },
@@ -122,9 +121,7 @@ export const PILOT_GOALS: PilotGoal[] = [
     title: "Mobility-impaired evac visibility",
     target: "All evac-chair occupants visible < 30 s",
     evaluate: ({ occupants, elapsedSeconds }) => {
-      const ara = occupants.filter(
-        (o) => o.mobilityImpaired || o.isAtARA,
-      );
+      const ara = occupants.filter((o) => o.mobilityImpaired || o.isAtARA);
       const visible = ara.filter(isVisible).length;
       const denom = Math.max(ara.length, FLOOR7_CENSUS.evacChairOccupants);
       const value = `${visible}/${denom} visible to FSD + FDNY`;
@@ -174,11 +171,15 @@ export const PILOT_GOALS: PilotGoal[] = [
     category: "Compliance",
     title: "No drill data in real submissions",
     target: "Zero drill records in any FDNY filing",
-    evaluate: ({ isDrill }) => ({
-      value: isDrill ? "DRILL mode (quarantined)" : "REAL incident mode",
-      status: "MET",
-      detail: "Drill vs. real are separate record sets",
-    }),
+    evaluate: ({ isDrill, records }) => {
+      const drill = records?.drill ?? 0;
+      const real = records?.real ?? 0;
+      return {
+        value: isDrill ? "DRILL mode (quarantined)" : "REAL incident mode",
+        status: "MET",
+        detail: `REAL set: ${real} filing${real === 1 ? "" : "s"} · ${drill} drill entr${drill === 1 ? "y" : "ies"} stored separately`,
+      };
+    },
   },
   {
     id: "wearable_critical",

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Occupant, LedgerBlock, DrillHistoryItem } from "../types";
 import { PILOT_GOALS, PilotGoalContext } from "../pilotGoals";
+import { saveRecord, recordCounts } from "../recordStore";
 
 interface FSDCommandCenterProps {
   occupants: Occupant[];
@@ -42,6 +43,7 @@ interface FSDCommandCenterProps {
   ledgerIntegrity: { verified: boolean; auditLogs: string[] };
   activeDirective: string;
   onDispatchDirective: (directive: string) => void;
+  onDispatchFamilySms?: () => void;
 }
 
 const ROADMAP_ITEMS = {
@@ -167,6 +169,7 @@ export default function FSDCommandCenter({
   ledgerIntegrity,
   activeDirective,
   onDispatchDirective,
+  onDispatchFamilySms,
 }: FSDCommandCenterProps) {
   // Safety Checklist State (OSHA 1910.38 & NYC RS-17 compliance)
   const [checklist, setChecklist] = useState([
@@ -244,6 +247,10 @@ export default function FSDCommandCenter({
   // FDNY generated report state
   const [fdnyReport, setFdnyReport] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Counts of persisted records in the two *isolated* sets (drill vs real).
+  // Goal #6: zero drill data ever lands in a real FDNY submission.
+  const [recordStats, setRecordStats] = useState(() => recordCounts());
 
   // Headcount & Locator System States
   const [locatorTab, setLocatorTab] = useState<"ALL" | "AT_RISK" | "SAFE">(
@@ -394,11 +401,13 @@ export default function FSDCommandCenter({
     ).length;
     const missingCount = occupants.filter((o) => o.status === "MISSING").length;
 
+    const recordMode = isDrill ? "drill" : "real";
     const formattedReport = `================================================================================
 MUSTERCOMMAND LIFE-SAFETY COMPLIANCE AUDIT CERTIFICATE
 REGULATORY CLEARANCE: NYC LL26 (RS-17) / OSHA 29 CFR 1910.38
 CONEDISON FLOOR 7 PILOT DIVISION - 4 IRVING PLAZA, NEW YORK NY
 ================================================================================
+RECORD CLASSIFICATION : ${isDrill ? "*** DRILL — NOT FOR FDNY SUBMISSION ***" : "REAL INCIDENT — FDNY SUBMISSION ELIGIBLE"}
 INCIDENT TIMESTAMP : ${uniqueTimeStr}
 MESSENGER SECTOR   : Life-Critical FSD Comm Station
 INCIDENT LIFETIME   : ${formatElapsed(elapsedSeconds)} elapsed
@@ -427,8 +436,23 @@ MusterCommand OS Integration Engine
 ================================================================================`;
 
     setFdnyReport(formattedReport);
+
+    // Persist into the isolated record set for the active mode and refresh the
+    // live counts so Goal #6 can prove drill vs. real separation.
+    saveRecord(recordMode, {
+      total: occupants.length,
+      safe: safeCount,
+      missing: missingCount,
+      needHelp: needHelpCount,
+      critical: criticalCount,
+      ledgerBlocks: ledger.length,
+      ledgerVerified: ledgerIntegrity.verified,
+      report: formattedReport,
+    });
+    setRecordStats(recordCounts());
+
     onLogEvent(
-      `Generated legal compliance pre-arrival FDNY incident report at ${uniqueTimeStr}.`,
+      `Generated ${isDrill ? "DRILL" : "REAL-INCIDENT"} compliance report at ${uniqueTimeStr} — filed to the ${recordMode.toUpperCase()} record set (drill/real kept isolated).`,
     );
   };
 
@@ -495,7 +519,7 @@ MusterCommand OS Integration Engine
   );
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[2040px] xl:h-[1180px] text-slate-100 overflow-hidden">
+    <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col text-slate-100">
       {/* Commanding Header Ribbon */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 mb-4 gap-3">
         <div>
@@ -578,9 +602,9 @@ MusterCommand OS Integration Engine
       </div>
 
       {/* Main Panel Content (Grid layout) */}
-      <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-5 overflow-hidden">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 xl:h-[780px]">
         {/* PANEL 1: SITUATION RECON & CHECKLIST (3 Columns) */}
-        <div className="xl:col-span-3 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto no-scrollbar">
+        <div className="xl:col-span-3 min-h-[480px] bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto no-scrollbar">
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-1">
@@ -722,7 +746,7 @@ MusterCommand OS Integration Engine
         </div>
 
         {/* PANEL 2: MAP & DYNAMIC REROUTING (4 Columns) */}
-        <div className="xl:col-span-5 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col overflow-hidden">
+        <div className="xl:col-span-5 min-h-[560px] bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-2">
             <div>
               <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">
@@ -2115,7 +2139,7 @@ MusterCommand OS Integration Engine
         </div>
 
         {/* PANEL 3: HEADCOUNT & DYNAMIC LOCATOR BOARD */}
-        <div className="xl:col-span-4 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-hidden">
+        <div className="xl:col-span-4 min-h-[560px] bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-hidden">
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Header Telemetry */}
             <div className="flex justify-between items-center mb-2 shrink-0">
@@ -2648,9 +2672,44 @@ MusterCommand OS Integration Engine
               PILOT SUCCESS METRICS — FLOOR 7
             </span>
           </div>
-          <span className="text-[8px] bg-indigo-950/80 text-indigo-400 border border-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
-            Target vs Live
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (isDrill) {
+                  onLogEvent(
+                    "Family SAFE-SMS blocked: DRILL mode (no real next-of-kin contact).",
+                  );
+                  return;
+                }
+                onDispatchFamilySms && onDispatchFamilySms();
+              }}
+              disabled={isDrill}
+              className={`text-[9px] font-mono font-bold px-2 py-1 rounded-lg border transition-all flex items-center gap-1 ${
+                isDrill
+                  ? "bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed"
+                  : "bg-emerald-900/60 text-emerald-300 border-emerald-700 hover:bg-emerald-800/60 cursor-pointer active:scale-95"
+              }`}
+              title={
+                isDrill
+                  ? "Enabled only in REAL INCIDENT mode"
+                  : "Dispatch a SAFE SMS to every registered next-of-kin"
+              }
+            >
+              📱 Dispatch Family SAFE-SMS
+            </button>
+            <span
+              className="text-[8px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded font-mono font-bold uppercase"
+              title="Persisted records are kept in two isolated sets so drill data can never enter a real FDNY filing"
+            >
+              <span className="text-red-400">REAL {recordStats.real}</span>
+              <span className="text-slate-600"> · </span>
+              <span className="text-blue-400">DRILL {recordStats.drill}</span>
+            </span>
+            <span className="text-[8px] bg-indigo-950/80 text-indigo-400 border border-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+              Target vs Live
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {PILOT_GOALS.map((g) => {
@@ -2661,6 +2720,7 @@ MusterCommand OS Integration Engine
               elapsedSeconds,
               isBlackout,
               isDrill,
+              records: recordStats,
             };
             const r = g.evaluate(pilotCtx);
             const badge =
