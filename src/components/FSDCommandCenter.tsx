@@ -316,6 +316,10 @@ export default function FSDCommandCenter({
     onLogEvent(`FSD updated emergency checklist safety parameter.`);
   };
 
+  // Drill vs. real-incident mode. Gates family-notification SMS and keeps
+  // drill records quarantined from any real FDNY submission.
+  const [isDrill, setIsDrill] = useState(true);
+
   // ---- Interactive map: zoom / pan / full screen over the real floor plan ----
   const [mapZoom, setMapZoom] = useState(1);
   const [mapPan, setMapPan] = useState({ x: 0, y: 0 });
@@ -515,6 +519,25 @@ MusterCommand OS Integration Engine
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto">
+          <button
+            onClick={() => {
+              const next = !isDrill;
+              setIsDrill(next);
+              onLogEvent(
+                next
+                  ? "🟦 Mode set to DRILL. Records quarantined; family SMS suppressed."
+                  : "🔴 Mode set to REAL INCIDENT. Family SAFE-SMS dispatch armed.",
+              );
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all flex items-center gap-1.5 active:scale-95 ${
+              isDrill
+                ? "bg-blue-950 text-blue-300 border-blue-800"
+                : "bg-red-950 text-red-300 border-red-700 animate-pulse"
+            }`}
+            title="Toggle drill vs. real-incident mode"
+          >
+            {isDrill ? "🟦 DRILL MODE" : "🔴 REAL INCIDENT"}
+          </button>
           <button
             onClick={() => {
               setElapsedSeconds(0);
@@ -2637,7 +2660,7 @@ MusterCommand OS Integration Engine
               ledgerVerified: ledgerIntegrity.verified,
               elapsedSeconds,
               isBlackout,
-              isDrill: true,
+              isDrill,
             };
             const r = g.evaluate(pilotCtx);
             const badge =
