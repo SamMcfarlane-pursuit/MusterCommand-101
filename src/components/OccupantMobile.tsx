@@ -651,42 +651,52 @@ export default function OccupantMobile({
         </div>
       )}
 
-      {/* Fire Control Actions */}
-      <div className="flex flex-col gap-2 mt-auto pt-2 border-t border-gray-900 pb-2">
+      {/* Action bar — one clear primary button, two calmer secondary actions */}
+      <div className="flex flex-col gap-2.5 mt-auto pt-3 border-t border-gray-800 pb-2">
+        {/* PRIMARY: the action almost every occupant needs */}
         <button
-          onClick={() => {
-            onUpdateStatus(
-              occupant.id,
-              "CRITICAL",
-              selectedZone,
-              "🚨 AUTOMATIC SOS PANIC! Active device alarm triggered by occupant.",
-              true,
-            );
-            setStatusMessage(
-              "⚠️ EMERGENCY SOS BROADCAST SENT IN MESH PACKETS!",
-            );
-          }}
-          className="w-full bg-red-750 hover:bg-red-850 text-white font-mono text-[11px] py-3 border border-red-500/50 hover:border-red-400 rounded-xl font-bold uppercase transition-all tracking-wider active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.4)]"
-          id="btn-sos-panic"
+          type="button"
+          onClick={() => handleCheckIn("SAFE")}
+          aria-label="Check in as safe"
+          className="w-full min-h-[56px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer focus:outline-none focus:ring-4 focus:ring-emerald-400/50"
+          id="btn-evac-safe"
         >
-          <Flame size={14} className="text-white animate-bounce" />
-          ⚠️ SOS PANIC (EMERGENCY)
+          <CheckCircle size={22} aria-hidden="true" />
+          I'm Safe
         </button>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* SECONDARY: clearly separated, color-coded, no distracting animation */}
+        <div className="grid grid-cols-2 gap-2.5">
           <button
-            onClick={() => handleCheckIn("SAFE")}
-            className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/40 text-[11px] font-bold text-white py-2.5 px-3 rounded-xl flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 cursor-pointer"
-            id="btn-evac-safe"
-          >
-            <CheckCircle size={13} />I AM SAFE
-          </button>
-          <button
+            type="button"
             onClick={() => handleCheckIn("NEED_HELP")}
-            className="bg-red-600 hover:bg-red-500 border border-red-400/40 text-[11px] font-bold text-white py-2.5 px-3 rounded-xl flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 animate-pulse cursor-pointer"
+            aria-label="I need help"
+            className="min-h-[48px] bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer focus:outline-none focus:ring-4 focus:ring-amber-400/50"
             id="btn-evac-help"
           >
-            <AlertTriangle size={13} />I NEED HELP
+            <AlertTriangle size={18} aria-hidden="true" />
+            Need Help
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onUpdateStatus(
+                occupant.id,
+                "CRITICAL",
+                selectedZone,
+                "🚨 AUTOMATIC SOS PANIC! Active device alarm triggered by occupant.",
+                true,
+              );
+              setStatusMessage(
+                "⚠️ EMERGENCY SOS BROADCAST SENT IN MESH PACKETS!",
+              );
+            }}
+            aria-label="Emergency SOS"
+            className="min-h-[48px] bg-red-600 hover:bg-red-500 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer focus:outline-none focus:ring-4 focus:ring-red-400/50"
+            id="btn-sos-panic"
+          >
+            <Flame size={18} aria-hidden="true" />
+            SOS
           </button>
         </div>
       </div>
