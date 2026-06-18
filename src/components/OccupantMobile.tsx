@@ -32,7 +32,7 @@ const alertFormSchema = z.object({
 // routed the right way the moment they pick an assembly zone.
 const ZONE_STAIR: Record<
   string,
-  { stair: "Stair A" | "Stair B"; label: string; desc: string }
+  { stair: "Stair A" | "Stair C"; label: string; desc: string }
 > = {
   "Zone A": {
     stair: "Stair A",
@@ -40,9 +40,9 @@ const ZONE_STAIR: Record<
     desc: "Primary egress — exits toward Union Square Park.",
   },
   "Zone B": {
-    stair: "Stair B",
-    label: "Stair B (South)",
-    desc: "Secondary egress — exits toward 14th St South.",
+    stair: "Stair C",
+    label: "Stair C (East)",
+    desc: "Secondary egress — exits toward East 14th St.",
   },
   "Zone C": {
     stair: "Stair A",
@@ -290,7 +290,7 @@ export default function OccupantMobile({
         </p>
         {stairBBlocked && (
           <p className="text-[10px] text-red-300 font-bold mt-1.5 flex items-center gap-1">
-            <AlertTriangle size={10} className="shrink-0" /> Stair B is BLOCKED
+            <AlertTriangle size={10} className="shrink-0" /> Stair C is BLOCKED
             — evacuate via Stair A.
           </p>
         )}
@@ -529,7 +529,7 @@ export default function OccupantMobile({
               {ZONE_STAIR[selectedZone] &&
                 (() => {
                   const route = ZONE_STAIR[selectedZone];
-                  const blocked = route.stair === "Stair B" && stairBBlocked;
+                  const blocked = route.stair === "Stair C" && stairBBlocked;
                   return (
                     <div
                       className={`mt-2 rounded-lg border p-2.5 ${
@@ -558,7 +558,7 @@ export default function OccupantMobile({
                       </div>
                       <p className="text-[10px] text-gray-400 mt-1 leading-tight">
                         {blocked
-                          ? "⚠ Stair B is BLOCKED — reroute to Stair A (North) immediately."
+                          ? "⚠ Stair C is BLOCKED — reroute to Stair A (North) immediately."
                           : route.desc}
                       </p>
                     </div>

@@ -676,8 +676,8 @@ export default function App() {
                   setStairBBlocked(!stairBBlocked);
                   logEvent(
                     stairBBlocked
-                      ? "Stair B blockage cleared. Wardens reporting free passage."
-                      : "Stair B blockage logged near NW landing! Bluetooth rerouting plan dispatched.",
+                      ? "Stair C blockage cleared. Wardens reporting free passage."
+                      : "Stair C blockage logged on the East 14th St landing! Bluetooth rerouting plan dispatched.",
                   );
                 }}
                 onTamperLedger={tamperLedgerChain}

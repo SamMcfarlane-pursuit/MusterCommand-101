@@ -1,5 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle, AlertTriangle, Play, HelpCircle, FileText, Send, Sparkles, RefreshCw, Layers, ShieldCheck, Database, Flame, Clock, Trash2, ShieldX, ChevronLeft, ChevronRight, MapPin, Unlock, Accessibility, Armchair } from "lucide-react";
+import {
+  CheckCircle,
+  AlertTriangle,
+  Play,
+  HelpCircle,
+  FileText,
+  Send,
+  Sparkles,
+  RefreshCw,
+  Layers,
+  ShieldCheck,
+  Database,
+  Flame,
+  Clock,
+  Trash2,
+  ShieldX,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Unlock,
+  Accessibility,
+  Armchair,
+} from "lucide-react";
 import { Occupant, LedgerBlock, DrillHistoryItem } from "../types";
 import FloorMap from "./FloorMap";
 
@@ -28,7 +50,8 @@ const ROADMAP_ITEMS = {
       location: "74th St, 59th St, & East River",
       assigned: "EH&S & Wardens Team",
       desc: "Interview wardens and EH&S SMEs at 74th St, 59th St, and East River to understand information flow during drills.",
-      outcome: "✓ Completed. Physical clipboards and hand-tallies are prone to dropouts or 18-minute transmission lags."
+      outcome:
+        "✓ Completed. Physical clipboards and hand-tallies are prone to dropouts or 18-minute transmission lags.",
     },
     {
       key: "live_drill",
@@ -37,7 +60,8 @@ const ROADMAP_ITEMS = {
       location: "East River Facility",
       assigned: "EH&S & Robert",
       desc: "Observe or walk through a live drill if permitted to audit process bottlenecks in real time.",
-      outcome: "✓ Observed. Paper clipboards introduce lag in distress message relay and coordinate alignment."
+      outcome:
+        "✓ Observed. Paper clipboards introduce lag in distress message relay and coordinate alignment.",
     },
     {
       key: "map_evac",
@@ -46,7 +70,8 @@ const ROADMAP_ITEMS = {
       location: "Joint Office Pilot",
       assigned: "EH&S Joint Taskforce",
       desc: "Map the current evacuation process — what works, what breaks (e.g. communication stairwells vs. assembly points).",
-      outcome: "✓ Mapped. Decibel sirens work well; staircase voice relays break down entirely under load."
+      outcome:
+        "✓ Mapped. Decibel sirens work well; staircase voice relays break down entirely under load.",
     },
     {
       key: "pain_point",
@@ -55,8 +80,9 @@ const ROADMAP_ITEMS = {
       location: "Muster Command Terminal",
       assigned: "Sam & Robert",
       desc: "Identify the #1 pain point to solve in 6 weeks to ensure rapid deployment of a reliable digital backup.",
-      outcome: "✓ Identified. Distressed personnel identification time. Solution: Offline-first BLE QR muster scan."
-    }
+      outcome:
+        "✓ Identified. Distressed personnel identification time. Solution: Offline-first BLE QR muster scan.",
+    },
   ],
   MOCKUPS: [
     {
@@ -66,7 +92,8 @@ const ROADMAP_ITEMS = {
       location: "Product Management Board",
       assigned: "SMEs & Dev Team",
       desc: "Lock the must-have feature list and agree what gets mocked vs. built for the 6-week MVP timeline.",
-      outcome: "✓ Agreed. Built: Cryptographic live hash-ledgers and offline scanner. Mocked: Real BLE mesh network bulk count."
+      outcome:
+        "✓ Agreed. Built: Cryptographic live hash-ledgers and offline scanner. Mocked: Real BLE mesh network bulk count.",
     },
     {
       key: "mobile_mockups",
@@ -75,7 +102,8 @@ const ROADMAP_ITEMS = {
       location: "UX Board & Tablets",
       assigned: "Design & UX Group",
       desc: "Design and export clickable mobile mockups — warden headcount flow, status taps, assembly point view.",
-      outcome: "✓ Designed. Wardens loved the visual high-contrast layout and easy toggle tabs."
+      outcome:
+        "✓ Designed. Wardens loved the visual high-contrast layout and easy toggle tabs.",
     },
     {
       key: "feedback",
@@ -84,8 +112,9 @@ const ROADMAP_ITEMS = {
       location: "74th & 59th St Offices",
       assigned: "SMEs & Wardens",
       desc: "Review mockups with wardens and EH&S by end of Week 2 — get real feedback on ease of use under stress.",
-      outcome: "✓ Integrated. Added persistent sector filters, unseal drawer, and pagination blocks."
-    }
+      outcome:
+        "✓ Integrated. Added persistent sector filters, unseal drawer, and pagination blocks.",
+    },
   ],
   BUILD: [
     {
@@ -95,7 +124,8 @@ const ROADMAP_ITEMS = {
       location: "ConEd Sandbox / Dev Repo",
       assigned: "Sam & Robert",
       desc: "Sam: spike on Photo System & ARCOS access. Robert: set up dev environment to configure the project.",
-      outcome: "✓ Complete. Vite build configured and sandbox API connection established."
+      outcome:
+        "✓ Complete. Vite build configured and sandbox API connection established.",
     },
     {
       key: "backend_api",
@@ -104,7 +134,8 @@ const ROADMAP_ITEMS = {
       location: "Secure Cloud Run Pod",
       assigned: "Sam (Backend)",
       desc: "Sam: Stand up backend — data model, roster sync, API scaffold, mocked ARCOS & Photo data.",
-      outcome: "✓ Complete. Serves live cryptographic token scans and secure TLS 1.3 decryptions."
+      outcome:
+        "✓ Complete. Serves live cryptographic token scans and secure TLS 1.3 decryptions.",
     },
     {
       key: "first_build",
@@ -113,9 +144,10 @@ const ROADMAP_ITEMS = {
       location: "Command Station Central",
       assigned: "Robert (Frontend)",
       desc: "Robert: First working build of headcount flow connected to Sam's API (showing live synchronization).",
-      outcome: "★ Running load. Integrates real-time peer communication status with security vault unseals."
-    }
-  ]
+      outcome:
+        "★ Running load. Integrates real-time peer communication status with security vault unseals.",
+    },
+  ],
 };
 
 export default function FSDCommandCenter({
@@ -131,23 +163,50 @@ export default function FSDCommandCenter({
   isLedgerTampered,
   ledgerIntegrity,
   activeDirective,
-  onDispatchDirective
+  onDispatchDirective,
 }: FSDCommandCenterProps) {
-  
   // Safety Checklist State (OSHA 1910.38 & NYC RS-17 compliance)
   const [checklist, setChecklist] = useState([
-    { id: "check_1", task: "Confirm FSD Desk Fire Command Station Enclosure (NYC RS-17)", done: true },
-    { id: "check_2", task: "Transmit evacuation signals to Floor 7 Pilot Strobe lamps", done: true },
-    { id: "check_3", task: "Establish BLE Mesh peer routing backup links", done: true },
-    { id: "check_4", task: "Dispatch Quadrant Wardens to Stairwell landings", done: false },
-    { id: "check_5", task: "Cross-verify hash-chained rosters against gate sensor cards", done: false },
-    { id: "check_6", task: "Generate pre-arrival incident reports to bundle for FDNY arrival Liaison", done: false }
+    {
+      id: "check_1",
+      task: "Confirm FSD Desk Fire Command Station Enclosure (NYC RS-17)",
+      done: true,
+    },
+    {
+      id: "check_2",
+      task: "Transmit evacuation signals to Floor 7 Pilot Strobe lamps",
+      done: true,
+    },
+    {
+      id: "check_3",
+      task: "Establish BLE Mesh peer routing backup links",
+      done: true,
+    },
+    {
+      id: "check_4",
+      task: "Dispatch Quadrant Wardens to Stairwell landings",
+      done: false,
+    },
+    {
+      id: "check_5",
+      task: "Cross-verify hash-chained rosters against gate sensor cards",
+      done: false,
+    },
+    {
+      id: "check_6",
+      task: "Generate pre-arrival incident reports to bundle for FDNY arrival Liaison",
+      done: false,
+    },
   ]);
 
   // 6-Week EH&S Discovery & Implementation Roadmap States
-  const [roadmapTab, setRoadmapTab] = useState<"RESEARCH" | "MOCKUPS" | "BUILD">("RESEARCH");
+  const [roadmapTab, setRoadmapTab] = useState<
+    "RESEARCH" | "MOCKUPS" | "BUILD"
+  >("RESEARCH");
   const [activeTaskKey, setActiveTaskKey] = useState<string>("interview");
-  const [completedRoadmap, setCompletedRoadmap] = useState<Record<string, boolean>>({
+  const [completedRoadmap, setCompletedRoadmap] = useState<
+    Record<string, boolean>
+  >({
     interview: true,
     live_drill: true,
     map_evac: true,
@@ -161,13 +220,19 @@ export default function FSDCommandCenter({
   });
 
   const handleToggleRoadmapTask = (key: string) => {
-    setCompletedRoadmap(prev => {
+    setCompletedRoadmap((prev) => {
       const nextVal = !prev[key];
       // Find the task across all lists
-      const allTasks = [...ROADMAP_ITEMS.RESEARCH, ...ROADMAP_ITEMS.MOCKUPS, ...ROADMAP_ITEMS.BUILD];
-      const taskItem = allTasks.find(t => t.key === key);
+      const allTasks = [
+        ...ROADMAP_ITEMS.RESEARCH,
+        ...ROADMAP_ITEMS.MOCKUPS,
+        ...ROADMAP_ITEMS.BUILD,
+      ];
+      const taskItem = allTasks.find((t) => t.key === key);
       if (taskItem) {
-        onLogEvent(`EH&S Roadmap task updated: [${taskItem.title}] set to ${nextVal ? "COMPLETED" : "IN-PROGRESS"}.`);
+        onLogEvent(
+          `EH&S Roadmap task updated: [${taskItem.title}] set to ${nextVal ? "COMPLETED" : "IN-PROGRESS"}.`,
+        );
       }
       return { ...prev, [key]: nextVal };
     });
@@ -178,8 +243,12 @@ export default function FSDCommandCenter({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Headcount & Locator System States
-  const [locatorTab, setLocatorTab] = useState<"ALL" | "AT_RISK" | "ACCOUNTED">("ALL");
-  const [locatorSector, setLocatorSector] = useState<"ALL" | "NW" | "NE" | "SW" | "SE" | "Center">("ALL");
+  const [locatorTab, setLocatorTab] = useState<"ALL" | "AT_RISK" | "ACCOUNTED">(
+    "ALL",
+  );
+  const [locatorSector, setLocatorSector] = useState<
+    "ALL" | "NW" | "NE" | "SW" | "SE" | "Center"
+  >("ALL");
   const [locatorPage, setLocatorPage] = useState(1);
   const [fsdSearchQuery, setFsdSearchQuery] = useState("");
   const [unsealedTokenId, setUnsealedTokenId] = useState<string | null>(null);
@@ -199,14 +268,18 @@ export default function FSDCommandCenter({
       const res = await fetch("/api/vault/decrypt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: tokenId, requesterId: "fsd_admin" })
+        body: JSON.stringify({ token: tokenId, requesterId: "fsd_admin" }),
       });
       if (res.ok) {
         const data = await res.json();
         setUnsealedDetails(data.decrypted);
-        onLogEvent(`Security unseal authorised: Command decrypted identity for token ${tokenId} over TLS 1.3.`);
+        onLogEvent(
+          `Security unseal authorised: Command decrypted identity for token ${tokenId} over TLS 1.3.`,
+        );
       } else {
-        onLogEvent(`Unseal error: Secure Vault Node rejected request for token ${tokenId}.`);
+        onLogEvent(
+          `Unseal error: Secure Vault Node rejected request for token ${tokenId}.`,
+        );
       }
     } catch (e) {
       console.error(e);
@@ -218,33 +291,45 @@ export default function FSDCommandCenter({
   // Dynamic incident clock
   useEffect(() => {
     const timer = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
+      setElapsedSeconds((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   const formatElapsed = (sec: number) => {
-    const mm = Math.floor(sec / 60).toString().padStart(2, "0");
+    const mm = Math.floor(sec / 60)
+      .toString()
+      .padStart(2, "0");
     const ss = (sec % 60).toString().padStart(2, "0");
     return `${mm}:${ss}`;
   };
 
   const handleToggleChecklist = (id: string) => {
-    setChecklist(prev => prev.map(item => item.id === id ? { ...item, done: !item.done } : item));
+    setChecklist((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item,
+      ),
+    );
     onLogEvent(`FSD updated emergency checklist safety parameter.`);
   };
-
-
 
   // Generate compliance FDNY reports (NYC LL26 Rs-17 Audit checklist)
   const generateFdnyReport = () => {
     const uniqueTimeStr = new Date().toUTCString();
-    const safeCount = occupants.filter(o => o.status === "ACCOUNTED").length;
-    const criticalCount = occupants.filter(o => o.status === "MEDICAL" && o.fallDetected).length;
-    const needHelpCount = occupants.filter(o => o.status === "MEDICAL" && !o.fallDetected).length;
-    const araCount = occupants.filter(o => o.status === "ARA_STAGING").length;
-    const missingCount = occupants.filter(o => o.status === "MISSING").length;
-    const drillRate = Math.round((occupants.filter(o => o.drillParticipant !== false).length / occupants.length) * 100);
+    const safeCount = occupants.filter((o) => o.status === "ACCOUNTED").length;
+    const criticalCount = occupants.filter(
+      (o) => o.status === "MEDICAL" && o.fallDetected,
+    ).length;
+    const needHelpCount = occupants.filter(
+      (o) => o.status === "MEDICAL" && !o.fallDetected,
+    ).length;
+    const araCount = occupants.filter((o) => o.status === "ARA_STAGING").length;
+    const missingCount = occupants.filter((o) => o.status === "MISSING").length;
+    const drillRate = Math.round(
+      (occupants.filter((o) => o.drillParticipant !== false).length /
+        occupants.length) *
+        100,
+    );
 
     const formattedReport = `================================================================================
 MUSTERCOMMAND LIFE-SAFETY COMPLIANCE AUDIT CERTIFICATE
@@ -260,7 +345,7 @@ NETWORK LINK TYPE  : ${isBlackout ? "HMAC Bluetooth Mesh - Backup Gateway" : "Pr
 1. COMPREHENSIVE HEADCOUNT STATS
 --------------------------------------------------------------------------------
 TOTAL ON-SITE ROSTER REGISTRATION : ${occupants.length} personnel
-DECIPHERED AS SAFE (ACCOUNTED)    : ${safeCount} 
+DECIPHERED AS SAFE (ACCOUNTED)    : ${safeCount}
 STAGED AT AREA OF RESCUE (ARA)    : ${araCount}
 DECLARED UNACCOUNTED (MISSING)    : ${missingCount}
 REPORTED PHYSICAL DISTRESS (MIA)  : ${needHelpCount}
@@ -279,9 +364,11 @@ CERTIFIED BY:
 Fire Safety Director (F-89 Designation Logged)
 MusterCommand OS Integration Engine
 ================================================================================`;
-    
+
     setFdnyReport(formattedReport);
-    onLogEvent(`Generated legal compliance pre-arrival FDNY incident report at ${uniqueTimeStr}.`);
+    onLogEvent(
+      `Generated legal compliance pre-arrival FDNY incident report at ${uniqueTimeStr}.`,
+    );
   };
 
   // Sort by DANGER LEVEL > PROXIMITY (Section 8.3 Wireframe)
@@ -294,7 +381,7 @@ MusterCommand OS Integration Engine
   };
 
   const sortedRedList = [...occupants]
-    .filter(o => o.status !== "ACCOUNTED")
+    .filter((o) => o.status !== "ACCOUNTED")
     .sort((a, b) => {
       const wa = getDangerWeight(a.status);
       const wb = getDangerWeight(b.status);
@@ -304,22 +391,26 @@ MusterCommand OS Integration Engine
     });
 
   const filteredLocatorOccupants = [...occupants]
-    .filter(o => {
+    .filter((o) => {
       // 1. Tab Status Filter
       if (locatorTab === "AT_RISK" && o.status === "ACCOUNTED") return false;
       if (locatorTab === "ACCOUNTED" && o.status !== "ACCOUNTED") return false;
-      
+
       // 2. Sector Filter
       if (locatorSector !== "ALL" && o.quadrant !== locatorSector) return false;
-      
+
       // 3. Text Search Query
       if (fsdSearchQuery) {
         const query = fsdSearchQuery.toLowerCase();
-        const matchesName = o.nameEncrypted.toLowerCase().includes(query) || o.id.toLowerCase().includes(query);
+        const matchesName =
+          o.nameEncrypted.toLowerCase().includes(query) ||
+          o.id.toLowerCase().includes(query);
         const matchesBadge = o.badgeId.toLowerCase().includes(query);
         const matchesRole = o.role.toLowerCase().includes(query);
-        const matchesNote = o.alertNote && o.alertNote.toLowerCase().includes(query);
-        if (!matchesName && !matchesBadge && !matchesRole && !matchesNote) return false;
+        const matchesNote =
+          o.alertNote && o.alertNote.toLowerCase().includes(query);
+        if (!matchesName && !matchesBadge && !matchesRole && !matchesNote)
+          return false;
       }
       return true;
     })
@@ -332,29 +423,33 @@ MusterCommand OS Integration Engine
 
   // Calculate items for pagination
   const PAGE_SIZE = 3;
-  const maxPage = Math.max(1, Math.ceil(filteredLocatorOccupants.length / PAGE_SIZE));
+  const maxPage = Math.max(
+    1,
+    Math.ceil(filteredLocatorOccupants.length / PAGE_SIZE),
+  );
   const activeLocatorPage = Math.min(locatorPage, maxPage);
   const paginatedLocatorOccupants = filteredLocatorOccupants.slice(
     (activeLocatorPage - 1) * PAGE_SIZE,
-    activeLocatorPage * PAGE_SIZE
+    activeLocatorPage * PAGE_SIZE,
   );
 
   // Area of Rescue Assistance (ARA) — mobility-impaired / evac-chair occupants.
   // Surfaced as a dedicated board so FDNY immediately knows who awaits assisted evacuation.
   const araList = [...occupants]
-    .filter(o => o.mobilityImpaired || o.status === "ARA_STAGING")
+    .filter((o) => o.mobilityImpaired || o.status === "ARA_STAGING")
     .sort((a, b) => {
       // Not-yet-staged (still in transit) first so they stay top-of-mind.
-      const aStaged = (a.isAtARA || a.status === "ARA_STAGING") ? 1 : 0;
-      const bStaged = (b.isAtARA || b.status === "ARA_STAGING") ? 1 : 0;
+      const aStaged = a.isAtARA || a.status === "ARA_STAGING" ? 1 : 0;
+      const bStaged = b.isAtARA || b.status === "ARA_STAGING" ? 1 : 0;
       if (aStaged !== bStaged) return aStaged - bStaged;
       return a.id.localeCompare(b.id);
     });
-  const araStaged = araList.filter(o => o.isAtARA || o.status === "ARA_STAGING").length;
+  const araStaged = araList.filter(
+    (o) => o.isAtARA || o.status === "ARA_STAGING",
+  ).length;
 
   return (
     <div className="w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl flex flex-col h-[1440px] xl:h-[710px] text-slate-100 overflow-hidden">
-      
       {/* Commanding Header Ribbon */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 mb-4 gap-3">
         <div>
@@ -363,7 +458,8 @@ MusterCommand OS Integration Engine
               INCIDENT ACTIVE
             </span>
             <h2 className="text-xl font-bold tracking-tight text-slate-100 font-sans">
-              MusterCommand <span className="text-slate-400 font-normal">Command Center</span>
+              MusterCommand{" "}
+              <span className="text-slate-400 font-normal">Command Center</span>
             </h2>
           </div>
           <div className="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-3">
@@ -391,16 +487,20 @@ MusterCommand OS Integration Engine
           <button
             onClick={onToggleStairB}
             className={`px-3 py-1.5 rounded-lg text-sm font-mono font-bold border transition-all ${
-              stairBBlocked 
-                ? "bg-yellow-950 text-yellow-400 border-yellow-700" 
+              stairBBlocked
+                ? "bg-yellow-950 text-yellow-400 border-yellow-700"
                 : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-755"
             }`}
           >
-            {stairBBlocked ? "⚠️ BLOCK STAIR B (ACTIVE)" : "BLOCK STAIR B"}
+            {stairBBlocked ? "⚠️ BLOCK STAIR C (ACTIVE)" : "BLOCK STAIR C"}
           </button>
           <button
             onClick={() => {
-              if(confirm("Confirm: Declare situation 100% CLEAR? This resolves current drill logs.")){
+              if (
+                confirm(
+                  "Confirm: Declare situation 100% CLEAR? This resolves current drill logs.",
+                )
+              ) {
                 onClearIncident();
               }
             }}
@@ -430,7 +530,7 @@ MusterCommand OS Integration Engine
             </span>
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {araList.map(occ => {
+            {araList.map((occ) => {
               const staged = occ.isAtARA || occ.status === "ARA_STAGING";
               return (
                 <button
@@ -444,11 +544,20 @@ MusterCommand OS Integration Engine
                   }`}
                 >
                   <div className="flex items-center gap-1.5">
-                    <Armchair size={12} className={staged ? "text-blue-300" : "text-red-300"} />
-                    <span className="text-[11px] font-mono font-bold text-slate-100">{occ.badgeId}</span>
-                    <span className="text-[8px] font-mono text-slate-400">{occ.quadrant}</span>
+                    <Armchair
+                      size={12}
+                      className={staged ? "text-blue-300" : "text-red-300"}
+                    />
+                    <span className="text-[11px] font-mono font-bold text-slate-100">
+                      {occ.badgeId}
+                    </span>
+                    <span className="text-[8px] font-mono text-slate-400">
+                      {occ.quadrant}
+                    </span>
                   </div>
-                  <div className={`text-[9px] font-bold mt-0.5 ${staged ? "text-blue-300" : "text-red-300"}`}>
+                  <div
+                    className={`text-[9px] font-bold mt-0.5 ${staged ? "text-blue-300" : "text-red-300"}`}
+                  >
                     {staged ? "✓ STAGED AT ARA" : "⚠ AWAITING — NOT AT ARA"}
                   </div>
                   {occ.alertNote && (
@@ -465,23 +574,30 @@ MusterCommand OS Integration Engine
 
       {/* Main Panel Content (Grid layout) */}
       <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-5 overflow-hidden">
-        
         {/* PANEL 1: SITUATION RECON & CHECKLIST (3 Columns) */}
         <div className="xl:col-span-3 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto no-scrollbar">
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">Emergency Hazard</span>
+                <span className="text-[10px] font-mono tracking-wider text-slate-400 uppercase">
+                  Emergency Hazard
+                </span>
                 <Flame className="text-red-500 animate-pulse" size={14} />
               </div>
-              <p className="text-base font-bold text-slate-100 uppercase font-sans">OFFICE FIRE IN NE SECTOR</p>
-              <p className="text-[10px] text-slate-400 font-mono mt-0.5">Floor 7 Breakroom, electrical box failure.</p>
+              <p className="text-base font-bold text-slate-100 uppercase font-sans">
+                OFFICE FIRE IN NE SECTOR
+              </p>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                Floor 7 Breakroom, electrical box failure.
+              </p>
             </div>
 
             <div className="border-t border-slate-850 pt-3">
-              <h4 className="text-[11px] font-mono tracking-widest text-slate-300 uppercase mb-2">NYC LL26 Action Matrix</h4>
+              <h4 className="text-[11px] font-mono tracking-widest text-slate-300 uppercase mb-2">
+                NYC LL26 Action Matrix
+              </h4>
               <div className="space-y-2">
-                {checklist.map(item => (
+                {checklist.map((item) => (
                   <label
                     key={item.id}
                     className="flex items-start gap-2 p-1.5 rounded hover:bg-slate-900/40 cursor-pointer select-none"
@@ -492,7 +608,9 @@ MusterCommand OS Integration Engine
                       onChange={() => handleToggleChecklist(item.id)}
                       className="mt-0.5 accent-amber-500 border-slate-700"
                     />
-                    <span className={`text-[10.5px] leading-tight ${item.done ? "line-through text-slate-500" : "text-slate-300"}`}>
+                    <span
+                      className={`text-[10.5px] leading-tight ${item.done ? "line-through text-slate-500" : "text-slate-300"}`}
+                    >
                       {item.task}
                     </span>
                   </label>
@@ -505,38 +623,50 @@ MusterCommand OS Integration Engine
           <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 mt-4 text-[10.5px] flex flex-col gap-2.5 shadow-md">
             <div>
               <span className="font-bold text-amber-500 flex items-center gap-1 uppercase text-[11px] mb-0.5">
-                <AlertTriangle size={12} className="text-amber-500 animate-pulse" /> F-89 Directive Dispatcher
+                <AlertTriangle
+                  size={12}
+                  className="text-amber-500 animate-pulse"
+                />{" "}
+                F-89 Directive Dispatcher
               </span>
-              <p className="text-[9.5px] text-slate-400 font-mono">NYC Local Law 26 Emergency Regulation Protocols</p>
+              <p className="text-[9.5px] text-slate-400 font-mono">
+                NYC Local Law 26 Emergency Regulation Protocols
+              </p>
             </div>
 
             {/* Current Active Broad Cast Display */}
             <div className="bg-slate-950 p-2 rounded-lg border border-slate-850/80">
-              <span className="text-[8px] font-mono tracking-wider uppercase text-slate-500 block">Current Active Broadcast:</span>
-              <p className="text-slate-200 font-medium text-[10px] leading-tight mt-1">{activeDirective}</p>
+              <span className="text-[8px] font-mono tracking-wider uppercase text-slate-500 block">
+                Current Active Broadcast:
+              </span>
+              <p className="text-slate-200 font-medium text-[10px] leading-tight mt-1">
+                {activeDirective}
+              </p>
             </div>
 
             {/* Quick Dispatch Presets */}
             <div className="space-y-1">
-              <span className="text-[8.5px] font-mono uppercase text-slate-400 block font-bold">Standard Reg Presets:</span>
+              <span className="text-[8.5px] font-mono uppercase text-slate-400 block font-bold">
+                Standard Reg Presets:
+              </span>
               <div className="grid grid-cols-1 gap-1">
                 {[
                   {
                     title: "Buffer Relocation Directive",
-                    text: "Phase 1 Relocation: Clear NE and SE occupants to NW safe zones immediately. Wardens secure landings."
+                    text: "Phase 1 Relocation: Clear NE and SE occupants to NW safe zones immediately. Wardens secure landings.",
                   },
                   {
                     title: "Whole Floor Evacuation",
-                    text: "Phase 2 Evacuation: Whole pilot floor evacuation declared. Proceed to designated safety exits."
+                    text: "Phase 2 Evacuation: Whole pilot floor evacuation declared. Proceed to designated safety exits.",
                   },
                   {
-                    title: "Stairwell B Congestion/Blocked",
-                    text: "Emergency Alert: Stair B reported congested or blocked. All floor components divert to northwest Stair A."
+                    title: "Stairwell C Congestion/Blocked",
+                    text: "Emergency Alert: Stair C (East 14th St) reported congested or blocked. All floor occupants divert to primary Stair A.",
                   },
                   {
                     title: "BLE Blackout Mesh Routing",
-                    text: "BLE Mesh Sync Active: Switch tablet sync to local Mesh bypass. Log security tag keys at Stairwell nodes."
-                  }
+                    text: "BLE Mesh Sync Active: Switch tablet sync to local Mesh bypass. Log security tag keys at Stairwell nodes.",
+                  },
                 ].map((preset, idx) => (
                   <button
                     key={idx}
@@ -546,7 +676,10 @@ MusterCommand OS Integration Engine
                     className="w-full text-left bg-slate-950 hover:bg-slate-850 border border-slate-850/60 hover:border-slate-705 p-1.5 rounded text-[9.5px] font-mono text-slate-300 transition-all truncate block cursor-pointer"
                     title={preset.text}
                   >
-                    ⚡ <span className="font-bold text-amber-500">{preset.title}</span>
+                    ⚡{" "}
+                    <span className="font-bold text-amber-500">
+                      {preset.title}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -600,9 +733,7 @@ MusterCommand OS Integration Engine
 
         {/* PANEL 3: HEADCOUNT & DYNAMIC LOCATOR BOARD */}
         <div className="xl:col-span-4 bg-slate-950/50 rounded-2xl border border-slate-800/80 p-3.5 flex flex-col justify-between overflow-hidden">
-          
           <div className="flex flex-col flex-1 overflow-hidden">
-            
             {/* Header Telemetry */}
             <div className="flex justify-between items-center mb-2 shrink-0">
               <h3 className="text-sm font-mono tracking-wider text-slate-300 uppercase font-bold flex items-center gap-1">
@@ -610,7 +741,8 @@ MusterCommand OS Integration Engine
                 <span>Headcount & Locator</span>
               </h3>
               <span className="text-[9px] bg-slate-900 border border-slate-800 text-slate-300 px-2 py-0.5 rounded-lg font-mono font-medium">
-                {occupants.filter(o => o.status === "ACCOUNTED").length} / {occupants.length} ACCOUNTED
+                {occupants.filter((o) => o.status === "ACCOUNTED").length} /{" "}
+                {occupants.length} ACCOUNTED
               </span>
             </div>
 
@@ -630,7 +762,7 @@ MusterCommand OS Integration Engine
 
             {/* Category tabs */}
             <div className="grid grid-cols-3 gap-1 mb-2 bg-slate-900/40 p-1 rounded-xl border border-slate-850 shrink-0 select-none">
-              {(["ALL", "AT_RISK", "ACCOUNTED"] as const).map(tab => (
+              {(["ALL", "AT_RISK", "ACCOUNTED"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -642,52 +774,58 @@ MusterCommand OS Integration Engine
                       ? tab === "AT_RISK"
                         ? "bg-red-950/60 text-red-400 border border-red-900/40"
                         : tab === "ACCOUNTED"
-                        ? "bg-emerald-950/60 text-emerald-400 border border-emerald-900/40"
-                        : "bg-slate-800 text-white border border-slate-700"
+                          ? "bg-emerald-950/60 text-emerald-400 border border-emerald-900/40"
+                          : "bg-slate-800 text-white border border-slate-700"
                       : "text-slate-400 hover:text-slate-250 cursor-pointer"
                   }`}
                 >
-                  {tab === "ALL" ? "ALL ROSTER" : tab === "AT_RISK" ? "MIA/AT RISK" : "ACCOUNTED"}
+                  {tab === "ALL"
+                    ? "ALL ROSTER"
+                    : tab === "AT_RISK"
+                      ? "MIA/AT RISK"
+                      : "ACCOUNTED"}
                 </button>
               ))}
             </div>
 
             {/* Sector/Quadrant pills selection */}
             <div className="flex flex-wrap gap-1 mb-2.5 shrink-0">
-              {(["ALL", "NW", "NE", "SW", "SE", "Center"] as const).map(sect => (
-                <button
-                  key={sect}
-                  onClick={() => {
-                    setLocatorSector(sect);
-                    setLocatorPage(1);
-                  }}
-                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono leading-none border transition-all ${
-                    locatorSector === sect
-                      ? "bg-amber-955 text-amber-400 border-amber-800 font-bold"
-                      : "bg-slate-900/80 text-slate-500 border-slate-850/80 hover:text-slate-300 cursor-pointer"
-                  }`}
-                >
-                  {sect === "ALL" ? "All Sectors" : sect}
-                </button>
-              ))}
+              {(["ALL", "NW", "NE", "SW", "SE", "Center"] as const).map(
+                (sect) => (
+                  <button
+                    key={sect}
+                    onClick={() => {
+                      setLocatorSector(sect);
+                      setLocatorPage(1);
+                    }}
+                    className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono leading-none border transition-all ${
+                      locatorSector === sect
+                        ? "bg-amber-955 text-amber-400 border-amber-800 font-bold"
+                        : "bg-slate-900/80 text-slate-500 border-slate-850/80 hover:text-slate-300 cursor-pointer"
+                    }`}
+                  >
+                    {sect === "ALL" ? "All Sectors" : sect}
+                  </button>
+                ),
+              )}
             </div>
 
             {/* Paginated elements listing (Scroll-free, strictly formatted to fit height) */}
             <div className="flex-1 space-y-1.5 overflow-hidden">
               {paginatedLocatorOccupants.length > 0 ? (
-                paginatedLocatorOccupants.map(o => (
+                paginatedLocatorOccupants.map((o) => (
                   <div
                     key={o.id}
                     className={`p-2 rounded-xl border flex flex-col justify-between transition-all ${
                       o.id === unsealedTokenId
                         ? "bg-slate-900 border-amber-500/70 shadow-lg"
                         : o.status === "MEDICAL"
-                        ? "bg-red-950/20 border-red-900/50 hover:bg-red-900/10"
-                        : o.status === "ARA_STAGING"
-                        ? "bg-blue-950/20 border-blue-900/40 hover:bg-blue-900/10"
-                        : o.status === "ACCOUNTED"
-                        ? "bg-emerald-950/15 border-emerald-900/30 hover:bg-emerald-900/10"
-                        : "bg-slate-900/40 border-slate-850 hover:bg-slate-850/50"
+                          ? "bg-red-950/20 border-red-900/50 hover:bg-red-900/10"
+                          : o.status === "ARA_STAGING"
+                            ? "bg-blue-950/20 border-blue-900/40 hover:bg-blue-900/10"
+                            : o.status === "ACCOUNTED"
+                              ? "bg-emerald-950/15 border-emerald-900/30 hover:bg-emerald-900/10"
+                              : "bg-slate-900/40 border-slate-850 hover:bg-slate-850/50"
                     }`}
                   >
                     <div className="flex justify-between items-start gap-1">
@@ -695,18 +833,28 @@ MusterCommand OS Integration Engine
                         <div className="mt-1 shrink-0">
                           <span className={`relative flex h-2 w-2`}>
                             {o.status !== "ACCOUNTED" && (
-                              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                                o.status === "MEDICAL" ? "bg-red-400" : "bg-blue-400"
-                              }`} />
+                              <span
+                                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                  o.status === "MEDICAL"
+                                    ? "bg-red-400"
+                                    : "bg-blue-400"
+                                }`}
+                              />
                             )}
-                            <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                              o.status === "ACCOUNTED" ? "bg-emerald-500" :
-                              o.status === "MEDICAL" ? "bg-red-500" :
-                              o.status === "ARA_STAGING" ? "bg-blue-400" : "bg-slate-500"
-                            }`} />
+                            <span
+                              className={`relative inline-flex rounded-full h-2 w-2 ${
+                                o.status === "ACCOUNTED"
+                                  ? "bg-emerald-500"
+                                  : o.status === "MEDICAL"
+                                    ? "bg-red-500"
+                                    : o.status === "ARA_STAGING"
+                                      ? "bg-blue-400"
+                                      : "bg-slate-500"
+                              }`}
+                            />
                           </span>
                         </div>
-                        
+
                         <div>
                           <div className="text-[11px] font-bold font-mono text-slate-200 flex flex-wrap items-center gap-1">
                             <span>
@@ -720,7 +868,10 @@ MusterCommand OS Integration Engine
                           </div>
 
                           <div className="text-[9px] text-slate-400 font-mono mt-0.5 leading-tight">
-                            Badge {o.badgeId} • Role: {o.role} • Quadrant: <span className="text-amber-400 font-semibold">{o.quadrant}</span>
+                            Badge {o.badgeId} • Role: {o.role} • Quadrant:{" "}
+                            <span className="text-amber-400 font-semibold">
+                              {o.quadrant}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -735,7 +886,9 @@ MusterCommand OS Integration Engine
                         }`}
                       >
                         <Unlock size={8} />
-                        <span>{unsealedTokenId === o.id ? "SEAL" : "JIT UNSEAL"}</span>
+                        <span>
+                          {unsealedTokenId === o.id ? "SEAL" : "JIT UNSEAL"}
+                        </span>
                       </button>
                     </div>
 
@@ -744,7 +897,10 @@ MusterCommand OS Integration Engine
                       <div className="mt-2 bg-slate-950/80 p-2 rounded-lg border border-amber-600/30 text-[9.5px] font-mono space-y-1 animate-fadeIn">
                         {isUnsealing ? (
                           <div className="flex items-center gap-1 text-slate-500">
-                            <RefreshCw size={10} className="animate-spin text-amber-500" />
+                            <RefreshCw
+                              size={10}
+                              className="animate-spin text-amber-500"
+                            />
                             <span>Unsealing Vault over TLS 1.3...</span>
                           </div>
                         ) : unsealedDetails ? (
@@ -757,14 +913,23 @@ MusterCommand OS Integration Engine
                             />
                             <div className="flex-1 min-w-0">
                               <p className="text-amber-400 font-bold font-sans text-[10px] leading-tight">
-                                {unsealedDetails.name} <span className="text-[7.5px] text-slate-500 font-mono">{unsealedDetails.role}</span>
+                                {unsealedDetails.name}{" "}
+                                <span className="text-[7.5px] text-slate-500 font-mono">
+                                  {unsealedDetails.role}
+                                </span>
                               </p>
-                              <p className="text-slate-400 text-[8.5px] mt-0.5 truncate">Dept: {unsealedDetails.department}</p>
-                              <p className="text-slate-400 text-[8.5px] truncate">Phone: {unsealedDetails.phone}</p>
+                              <p className="text-slate-400 text-[8.5px] mt-0.5 truncate">
+                                Dept: {unsealedDetails.department}
+                              </p>
+                              <p className="text-slate-400 text-[8.5px] truncate">
+                                Phone: {unsealedDetails.phone}
+                              </p>
                             </div>
                           </div>
                         ) : (
-                          <p className="text-red-400">Authorization link timed out.</p>
+                          <p className="text-red-400">
+                            Authorization link timed out.
+                          </p>
                         )}
                       </div>
                     )}
@@ -774,7 +939,7 @@ MusterCommand OS Integration Engine
                         “{o.alertNote}”
                       </div>
                     )}
-                    
+
                     <div className="flex justify-between items-center mt-1 text-[8px] font-mono text-slate-500">
                       <span>Last Seen log: {o.lastSeen}</span>
                       <span>Stairwell: {o.staircase || "Unverified"}</span>
@@ -792,7 +957,7 @@ MusterCommand OS Integration Engine
             <div className="flex justify-between items-center bg-slate-900/50 px-2 py-1.5 rounded-xl border border-slate-850 mt-2.5 shrink-0 select-none">
               <button
                 disabled={activeLocatorPage === 1}
-                onClick={() => setLocatorPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setLocatorPage((prev) => Math.max(1, prev - 1))}
                 className="text-[9px] font-mono bg-slate-950 hover:bg-slate-800 text-slate-350 border border-slate-800 px-2 py-1 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-slate-950 cursor-pointer flex items-center gap-0.5"
               >
                 <ChevronLeft size={10} />
@@ -800,19 +965,24 @@ MusterCommand OS Integration Engine
               </button>
 
               <span className="text-[9px] font-mono text-slate-400">
-                PAGE <span className="text-amber-400 font-bold">{activeLocatorPage}</span> OF <span className="text-slate-200">{maxPage}</span>
+                PAGE{" "}
+                <span className="text-amber-400 font-bold">
+                  {activeLocatorPage}
+                </span>{" "}
+                OF <span className="text-slate-200">{maxPage}</span>
               </span>
 
               <button
                 disabled={activeLocatorPage === maxPage}
-                onClick={() => setLocatorPage(prev => Math.min(maxPage, prev + 1))}
+                onClick={() =>
+                  setLocatorPage((prev) => Math.min(maxPage, prev + 1))
+                }
                 className="text-[9px] font-mono bg-slate-950 hover:bg-slate-800 text-slate-350 border border-slate-800 px-2 py-1 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-slate-950 cursor-pointer flex items-center gap-0.5"
               >
                 <span>NEXT</span>
                 <ChevronRight size={10} />
               </button>
             </div>
-
           </div>
 
           {/* Compliance generation */}
@@ -826,21 +996,20 @@ MusterCommand OS Integration Engine
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Down Layer bento expansions */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-5">
-        
         {/* EH&S DISCOVERY & DEVELOPMENT ROADMAP (6 Columns) */}
         <div className="xl:col-span-6 bg-slate-950/40 rounded-2xl border border-slate-800/80 p-4 flex flex-col h-[320px] overflow-hidden justify-between">
-          
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Header Telemetry */}
             <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2 shrink-0 select-none">
               <div className="flex items-center gap-1.5">
                 <Layers className="text-amber-500 animate-pulse" size={13} />
-                <span className="text-sm font-bold tracking-tight text-slate-200">EH&S FEASIBILITY DISCOVERY ROADMAP</span>
+                <span className="text-sm font-bold tracking-tight text-slate-200">
+                  EH&S FEASIBILITY DISCOVERY ROADMAP
+                </span>
               </div>
               <span className="text-[8px] bg-indigo-950/80 text-indigo-400 border border-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
                 6-WEEK DRILL LIFE-CYCLE
@@ -849,11 +1018,15 @@ MusterCommand OS Integration Engine
 
             {/* Three-tab progress selector */}
             <div className="grid grid-cols-3 gap-1 mb-2 bg-slate-900/50 p-1 rounded-xl border border-slate-850/80 shrink-0 select-none">
-              {(["RESEARCH", "MOCKUPS", "BUILD"] as const).map(tab => {
+              {(["RESEARCH", "MOCKUPS", "BUILD"] as const).map((tab) => {
                 // Compute tab progress percentage
                 const tabTasks = ROADMAP_ITEMS[tab];
-                const completedCount = tabTasks.filter(t => completedRoadmap[t.key]).length;
-                const tabPct = Math.round((completedCount / tabTasks.length) * 100);
+                const completedCount = tabTasks.filter(
+                  (t) => completedRoadmap[t.key],
+                ).length;
+                const tabPct = Math.round(
+                  (completedCount / tabTasks.length) * 100,
+                );
 
                 return (
                   <button
@@ -871,8 +1044,16 @@ MusterCommand OS Integration Engine
                         : "text-slate-400 hover:text-slate-200"
                     }`}
                   >
-                    <span>{tab === "RESEARCH" ? "W1-W2 STUDY" : tab === "MOCKUPS" ? "W2 DESIGN" : "W3-W4 SPRINT"}</span>
-                    <span className={`text-[7px] font-mono ${roadmapTab === tab ? "text-slate-900" : "text-amber-500/80"}`}>
+                    <span>
+                      {tab === "RESEARCH"
+                        ? "W1-W2 STUDY"
+                        : tab === "MOCKUPS"
+                          ? "W2 DESIGN"
+                          : "W3-W4 SPRINT"}
+                    </span>
+                    <span
+                      className={`text-[7px] font-mono ${roadmapTab === tab ? "text-slate-900" : "text-amber-500/80"}`}
+                    >
                       {tabPct}% DONE
                     </span>
                   </button>
@@ -884,7 +1065,7 @@ MusterCommand OS Integration Engine
             <div className="flex-1 grid grid-cols-12 gap-2.5 overflow-hidden">
               {/* Task Cards Left List */}
               <div className="col-span-5 flex flex-col gap-1 overflow-y-auto no-scrollbar">
-                {ROADMAP_ITEMS[roadmapTab].map(t => {
+                {ROADMAP_ITEMS[roadmapTab].map((t) => {
                   const isDone = !!completedRoadmap[t.key];
                   return (
                     <button
@@ -900,18 +1081,32 @@ MusterCommand OS Integration Engine
                     >
                       <div className="flex items-center gap-1.5 w-full">
                         {isDone ? (
-                          <CheckCircle className="text-emerald-500 shrink-0" size={10} />
+                          <CheckCircle
+                            className="text-emerald-500 shrink-0"
+                            size={10}
+                          />
                         ) : (
-                          <Clock className="text-slate-500 shrink-0 animate-pulse" size={10} />
+                          <Clock
+                            className="text-slate-500 shrink-0 animate-pulse"
+                            size={10}
+                          />
                         )}
-                        <span className="text-[10px] font-semibold font-sans leading-tight truncate flex-1">{t.title}</span>
+                        <span className="text-[10px] font-semibold font-sans leading-tight truncate flex-1">
+                          {t.title}
+                        </span>
                       </div>
-                      
+
                       <div className="flex justify-between items-center w-full mt-1">
-                        <span className="text-[7.5px] font-mono text-slate-500 truncate max-w-[70px]">{t.subtitle}</span>
-                        <span className={`text-[7px] font-mono font-bold px-1 rounded uppercase ${
-                          isDone ? "bg-emerald-950/60 text-emerald-400" : "bg-amber-950/60 text-amber-500"
-                        }`}>
+                        <span className="text-[7.5px] font-mono text-slate-500 truncate max-w-[70px]">
+                          {t.subtitle}
+                        </span>
+                        <span
+                          className={`text-[7px] font-mono font-bold px-1 rounded uppercase ${
+                            isDone
+                              ? "bg-emerald-950/60 text-emerald-400"
+                              : "bg-amber-950/60 text-amber-500"
+                          }`}
+                        >
                           {isDone ? "VERIFIED" : "PENDING"}
                         </span>
                       </div>
@@ -922,7 +1117,10 @@ MusterCommand OS Integration Engine
 
               {/* Task Details Right Panel */}
               {(() => {
-                const currentTask = ROADMAP_ITEMS[roadmapTab].find(t => t.key === activeTaskKey) || ROADMAP_ITEMS[roadmapTab][0];
+                const currentTask =
+                  ROADMAP_ITEMS[roadmapTab].find(
+                    (t) => t.key === activeTaskKey,
+                  ) || ROADMAP_ITEMS[roadmapTab][0];
                 const isTaskDone = !!completedRoadmap[currentTask.key];
                 return (
                   <div className="col-span-7 bg-slate-950/60 rounded-xl border border-slate-900 p-2.5 flex flex-col justify-between overflow-y-auto no-scrollbar font-mono text-[9px] text-slate-400">
@@ -946,9 +1144,11 @@ MusterCommand OS Integration Engine
                         <span className="truncate max-w-[110px]">
                           ASSIGNED: {currentTask.assigned}
                         </span>
-                        <span className="text-amber-500/70 font-semibold animate-pulse shrink-0">● OUTCOME</span>
+                        <span className="text-amber-500/70 font-semibold animate-pulse shrink-0">
+                          ● OUTCOME
+                        </span>
                       </div>
-                      
+
                       <div className="bg-slate-900/40 p-1.5 rounded border border-slate-850 text-slate-200 text-[8.5px] leading-tight font-sans italic">
                         {currentTask.outcome}
                       </div>
@@ -979,9 +1179,7 @@ MusterCommand OS Integration Engine
                 );
               })()}
             </div>
-
           </div>
-
         </div>
 
         {/* AUDIT TIMELINE LEDGER SECURE HASH-CHAINING (6 Columns) */}
@@ -989,7 +1187,9 @@ MusterCommand OS Integration Engine
           <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-3">
             <div className="flex items-center gap-1.5">
               <Database className="text-amber-500" size={15} />
-              <span className="text-sm font-bold tracking-tight text-slate-200">HASH-CHAINED SECURE AUDIT LEDGER</span>
+              <span className="text-sm font-bold tracking-tight text-slate-200">
+                HASH-CHAINED SECURE AUDIT LEDGER
+              </span>
             </div>
             {ledgerIntegrity.verified ? (
               <span className="text-[8px] bg-emerald-950 text-emerald-400 border border-emerald-900 px-1.5 py-0.2 rounded font-mono font-bold flex items-center gap-0.5">
@@ -1008,21 +1208,28 @@ MusterCommand OS Integration Engine
               <div
                 key={b.index}
                 className={`p-2 rounded-xl border flex flex-col gap-1 transition-all ${
-                  isLedgerTampered && b.index === 1 
-                    ? "bg-red-950/20 border-red-500/50 text-red-300 animate-pulse" 
+                  isLedgerTampered && b.index === 1
+                    ? "bg-red-950/20 border-red-500/50 text-red-300 animate-pulse"
                     : "bg-slate-900/30 border-slate-850"
                 }`}
               >
                 <div className="flex justify-between items-center text-[9px] pb-1 border-b border-slate-850/60 font-bold uppercase tracking-wide">
                   <span>Block #{b.index}</span>
-                  <span className="text-slate-500 text-[8px]">{b.timestamp}</span>
+                  <span className="text-slate-500 text-[8px]">
+                    {b.timestamp}
+                  </span>
                 </div>
                 <div className="text-[10px] text-slate-350 py-0.5">
-                  Event: <span className="font-sans text-slate-200">{b.event}</span>
+                  Event:{" "}
+                  <span className="font-sans text-slate-200">{b.event}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[8px] mt-1 pt-1 border-t border-slate-850/30">
-                  <span className="truncate text-slate-500">Prev: {b.prevHash}</span>
-                  <span className={`truncate text-right ${isLedgerTampered && b.index === 1 ? "text-red-400 font-bold" : "text-slate-500"}`}>
+                  <span className="truncate text-slate-500">
+                    Prev: {b.prevHash}
+                  </span>
+                  <span
+                    className={`truncate text-right ${isLedgerTampered && b.index === 1 ? "text-red-400 font-bold" : "text-slate-500"}`}
+                  >
                     Hash: <span className="text-gray-400">{b.hash}</span>
                   </span>
                 </div>
@@ -1047,7 +1254,6 @@ MusterCommand OS Integration Engine
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Pop up generated PDF Compliance report view */}
@@ -1055,7 +1261,9 @@ MusterCommand OS Integration Engine
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col h-[520px]">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
-              <h3 className="text-base font-bold text-slate-200">Legal Compliance Pre-Arrival Report</h3>
+              <h3 className="text-base font-bold text-slate-200">
+                Legal Compliance Pre-Arrival Report
+              </h3>
               <button
                 onClick={() => setFdnyReport(null)}
                 className="text-sm bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-white px-2 py-1 rounded"
@@ -1063,13 +1271,15 @@ MusterCommand OS Integration Engine
                 Close Report
               </button>
             </div>
-            
+
             <pre className="flex-1 bg-slate-950 text-slate-300 p-4 rounded-xl font-mono text-[9px] leading-relaxed overflow-auto border border-slate-850 select-text">
               {fdnyReport}
             </pre>
 
             <div className="mt-4 flex justify-between items-center text-[10px] font-mono text-slate-500">
-              <span>Ready for print output (FDNY handover time limit: &lt;5 mins)</span>
+              <span>
+                Ready for print output (FDNY handover time limit: &lt;5 mins)
+              </span>
               <button
                 onClick={() => {
                   window.print();
@@ -1082,7 +1292,6 @@ MusterCommand OS Integration Engine
           </div>
         </div>
       ) : null}
-
     </div>
   );
 }
