@@ -213,6 +213,34 @@ export default function FloorMap({
               isExpanded ? "min-h-[560px]" : "min-h-[320px]"
             }`}
           >
+            {/* Quadrant status pills (tap to filter) */}
+            <div className="absolute top-2 left-2 z-10 grid grid-cols-2 gap-1">
+              {quadrants.map((q) => {
+                const s = getQuadrantStats(q);
+                const issues = s.medical > 0 || s.missing > 0;
+                return (
+                  <button
+                    type="button"
+                    key={`pill-${q}`}
+                    onClick={() => onQuadrantClick && onQuadrantClick(q)}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-mono transition-all cursor-pointer ${
+                      selectedQuadrant === q
+                        ? "bg-amber-950/80 border-amber-600"
+                        : "bg-slate-900/90 border-slate-700 hover:border-slate-500"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${issues ? "bg-red-500" : "bg-emerald-500"}`}
+                    />
+                    <span className="font-bold text-slate-200">{q}</span>
+                    <span className="text-slate-400">
+                      {s.accounted}/{s.total}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Zoom / pan controls */}
             <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
               <button
