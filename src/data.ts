@@ -96,6 +96,23 @@ export const INITIAL_OCCUPANTS: Occupant[] = [
     drillParticipant: true,
   },
   {
+    // Mobility-impaired, still en-route — demonstrates the IN TRANSIT path
+    // on the ARA Evac-Chair Priority Board (isAtARA: false floats to top).
+    id: "usr_p2q3r4s5",
+    badgeId: "SW773344",
+    nameEncrypted: "R•••••• P•••",
+    role: "Occupant",
+    status: "NEED_HELP",
+    quadrant: "SW",
+    lastSeen: "10:06 AM",
+    alertNote: "En route to Stair A landing — evac-chair not yet reached.",
+    fallDetected: false,
+    mobilityImpaired: true,
+    isAtARA: false,
+    nextOfKinRegistered: true,
+    drillParticipant: true,
+  },
+  {
     id: "usr_k9l0m1n2",
     badgeId: "VIS00101",
     nameEncrypted: "S••••• W••••",
