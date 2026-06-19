@@ -24,9 +24,10 @@ import {
   Maximize2,
   Minimize2,
   RotateCcw,
+  Accessibility,
 } from "lucide-react";
 import { Occupant, LedgerBlock, DrillHistoryItem } from "../types";
-import { PILOT_GOALS, PilotGoalContext } from "../pilotGoals";
+import { PILOT_GOALS, PilotGoalContext, FLOOR7_CENSUS } from "../pilotGoals";
 import { saveRecord, recordCounts } from "../recordStore";
 
 interface FSDCommandCenterProps {
@@ -2404,6 +2405,164 @@ MusterCommand OS Integration Engine
           </div>
         </div>
       </div>
+
+      {/* ♿ ARA PRIORITY BOARD — Evac-Chair List, always visible to FSD + FDNY */}
+      {(() => {
+        const araAll = occupants.filter((o) => o.mobilityImpaired || o.isAtARA);
+        const inTransit = araAll.filter((o) => !o.isAtARA);
+        const staged = araAll.filter((o) => Boolean(o.isAtARA));
+        const sorted = [...inTransit, ...staged];
+        const denominator = Math.max(
+          sorted.length,
+          FLOOR7_CENSUS.evacChairOccupants,
+        );
+        return (
+          <div className="mt-5 bg-slate-950/40 border border-amber-900/40 rounded-2xl p-4">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-amber-900/30 pb-2 mb-3">
+              <div className="flex items-center gap-1.5">
+                <Accessibility className="text-amber-400" size={14} />
+                <span className="text-xs font-bold tracking-tight text-amber-200">
+                  ♿ EVAC-CHAIR LIST — Area of Rescue Assistance
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {inTransit.length > 0 && (
+                  <span className="text-[8px] bg-red-950 text-red-300 border border-red-800 px-1.5 py-0.5 rounded font-mono font-bold uppercase animate-pulse">
+                    {inTransit.length} IN TRANSIT
+                  </span>
+                )}
+                <span className="text-[8px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+                  STAGED {staged.length}/{denominator}
+                </span>
+                <span className="text-[8px] bg-slate-900 text-slate-500 border border-slate-800 px-1.5 py-0.5 rounded font-mono uppercase">
+                  FDNY PRIORITY
+                </span>
+              </div>
+            </div>
+
+            {/* Cards */}
+            {sorted.length === 0 ? (
+              <p className="text-[10px] text-slate-500 font-mono py-1">
+                No evac-chair occupants in this roster.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+                {sorted.map((o) => {
+                  const isStaged = Boolean(o.isAtARA);
+                  const isOpen = unsealedTokenId === o.id;
+                  return (
+                    <div
+                      key={o.id}
+                      className={`rounded-xl border p-2.5 flex flex-col gap-1.5 transition-all ${
+                        isOpen
+                          ? "border-amber-500/70 shadow-lg bg-slate-900/60"
+                          : isStaged
+                            ? "bg-blue-950/20 border-blue-800/40"
+                            : "bg-red-950/30 border-red-800/60"
+                      }`}
+                    >
+                      {/* Status + quadrant row */}
+                      <div className="flex items-center justify-between gap-1">
+                        <span
+                          className={`text-[7.5px] font-mono font-bold px-1.5 py-0.5 rounded uppercase border ${
+                            isStaged
+                              ? "bg-blue-900/80 text-blue-300 border-blue-700"
+                              : "bg-red-900/80 text-red-300 border-red-700"
+                          }`}
+                        >
+                          {isStaged ? "STAGED" : "IN TRANSIT"}
+                        </span>
+                        <span className="text-[7.5px] font-mono text-slate-500 bg-slate-900 border border-slate-800 px-1 py-0.5 rounded">
+                          {o.quadrant}
+                        </span>
+                      </div>
+
+                      {/* Name / token */}
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-100 leading-tight truncate">
+                          {isOpen && unsealedDetails
+                            ? unsealedDetails.name
+                            : o.nameEncrypted}
+                        </p>
+                        <p className="text-[8px] text-slate-500 font-mono truncate">
+                          {o.id}
+                        </p>
+                      </div>
+
+                      {/* Badge ID */}
+                      <p className="text-[8px] font-mono text-slate-400">
+                        Badge:{" "}
+                        <span className="text-slate-300">{o.badgeId}</span>
+                      </p>
+
+                      {/* Alert note */}
+                      {o.alertNote && (
+                        <p className="text-[8px] text-amber-300 italic leading-tight line-clamp-2">
+                          {o.alertNote}
+                        </p>
+                      )}
+
+                      {/* JIT Unseal button */}
+                      <button
+                        type="button"
+                        onClick={() => handleUnsealFsd(o.id)}
+                        className={`mt-auto text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                          isOpen
+                            ? "bg-yellow-600 text-slate-950 border-yellow-500"
+                            : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700"
+                        }`}
+                      >
+                        <Unlock size={8} />
+                        <span>{isOpen ? "SEAL" : "JIT UNSEAL"}</span>
+                      </button>
+
+                      {/* Inline vault drawer */}
+                      {isOpen && (
+                        <div className="bg-slate-950/80 p-2 rounded-lg border border-amber-600/30 text-[9px] font-mono space-y-1">
+                          {isUnsealing ? (
+                            <div className="flex items-center gap-1 text-slate-500">
+                              <RefreshCw
+                                size={10}
+                                className="animate-spin text-amber-500"
+                              />
+                              <span>Unsealing Vault over TLS 1.3…</span>
+                            </div>
+                          ) : unsealedDetails ? (
+                            <div className="flex gap-2 items-start">
+                              <img
+                                src={unsealedDetails.photo}
+                                alt="Unsealed preview"
+                                referrerPolicy="no-referrer"
+                                className="w-7 h-7 rounded object-cover border border-slate-800 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-amber-400 font-bold leading-tight truncate">
+                                  {unsealedDetails.name}
+                                </p>
+                                <p className="text-slate-400 truncate">
+                                  Dept: {unsealedDetails.department}
+                                </p>
+                                <p className="text-slate-400 truncate">
+                                  ☎ {unsealedDetails.phone}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-red-400">
+                              Authorization timed out.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Down Layer bento expansions */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-5">
