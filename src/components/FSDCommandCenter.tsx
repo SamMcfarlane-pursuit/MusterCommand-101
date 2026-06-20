@@ -434,6 +434,25 @@ LEDGER TAIL HASH       : Tail Block [${ledger[ledger.length - 1]?.hash.substring
 CERTIFIED BY:
 Fire Safety Director (F-89 Designation Logged)
 MusterCommand OS Integration Engine
+
+--------------------------------------------------------------------------------
+3. AREA OF RESCUE ASSISTANCE (ARA) — MOBILITY-IMPAIRED EVAC-CHAIR LIST
+--------------------------------------------------------------------------------
+${(() => {
+  const ara = occupants.filter((o) => o.mobilityImpaired || o.isAtARA);
+  if (ara.length === 0) return "  No mobility-impaired occupants registered.";
+  return ara
+    .map(
+      (o) =>
+        `  Token: ${o.id} | Badge: ${o.badgeId} | Quadrant: ${o.quadrant} | ` +
+        `Status: ${o.isAtARA ? "STAGED AT ARA" : "IN TRANSIT"} | ` +
+        `Incident Status: ${o.status}`,
+    )
+    .join("\n");
+})()}
+ARA TOTAL     : ${occupants.filter((o) => o.mobilityImpaired || o.isAtARA).length} occupants
+STAGED        : ${occupants.filter((o) => o.isAtARA).length} confirmed at Area of Rescue
+IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !o.isAtARA).length} en route — evac-chair dispatch required
 ================================================================================`;
 
     setFdnyReport(formattedReport);
@@ -601,6 +620,120 @@ MusterCommand OS Integration Engine
           </button>
         </div>
       </div>
+
+      {/* WEARABLE RED LIST — Goal #7: critical events surface in < 10 s */}
+      {(() => {
+        const redList = occupants.filter(
+          (o) => o.status === "CRITICAL" || o.fallDetected,
+        );
+        if (redList.length === 0) return null;
+        return (
+          <div className="mb-4 bg-red-950/30 border border-red-800/60 rounded-2xl p-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle
+                  size={13}
+                  className="text-red-400 animate-pulse"
+                />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-red-300">
+                  Wearable Red List — {redList.length} Active Alert
+                  {redList.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <span className="text-[8px] font-mono text-red-500 border border-red-800 bg-red-950 px-1.5 py-0.5 rounded uppercase">
+                FSD Priority · &lt;10 s
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {redList.map((o) => {
+                const isOpen = unsealedTokenId === o.id;
+                const eventLabel = o.fallDetected
+                  ? "FALL DETECTED"
+                  : "SOS / CRITICAL";
+                return (
+                  <div
+                    key={o.id}
+                    className={`flex-1 min-w-[180px] rounded-xl border p-2 flex flex-col gap-1 transition-all ${
+                      isOpen
+                        ? "bg-slate-900 border-amber-500/70 shadow-lg"
+                        : "bg-red-950/40 border-red-700/60"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[8px] font-mono font-bold text-red-300 bg-red-900/60 border border-red-700 px-1.5 py-0.5 rounded uppercase">
+                        {eventLabel}
+                      </span>
+                      <span className="text-[8px] font-mono text-slate-500 bg-slate-900 border border-slate-800 px-1 py-0.5 rounded">
+                        {o.quadrant}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-100 leading-tight truncate">
+                      {isOpen && unsealedDetails
+                        ? unsealedDetails.name
+                        : o.nameEncrypted}
+                    </p>
+                    <p className="text-[8px] text-slate-500 font-mono truncate">
+                      {o.id} · {o.badgeId}
+                    </p>
+                    {o.alertNote && (
+                      <p className="text-[8px] text-amber-300 italic leading-tight line-clamp-1">
+                        {o.alertNote}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleUnsealFsd(o.id)}
+                      className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                        isOpen
+                          ? "bg-yellow-600 text-slate-950 border-yellow-500"
+                          : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700"
+                      }`}
+                    >
+                      <Unlock size={8} />
+                      <span>{isOpen ? "SEAL" : "JIT UNSEAL"}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="bg-slate-950/80 p-1.5 rounded-lg border border-amber-600/30 text-[9px] font-mono space-y-0.5">
+                        {isUnsealing ? (
+                          <div className="flex items-center gap-1 text-slate-500">
+                            <RefreshCw
+                              size={9}
+                              className="animate-spin text-amber-500"
+                            />
+                            <span>Unsealing…</span>
+                          </div>
+                        ) : unsealedDetails ? (
+                          <div className="flex gap-1.5 items-start">
+                            <img
+                              src={unsealedDetails.photo}
+                              alt="ID"
+                              referrerPolicy="no-referrer"
+                              className="w-6 h-6 rounded object-cover border border-slate-800 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-amber-400 font-bold truncate">
+                                {unsealedDetails.name}
+                              </p>
+                              <p className="text-slate-400 truncate">
+                                {unsealedDetails.department}
+                              </p>
+                              <p className="text-slate-400 truncate">
+                                ☎ {unsealedDetails.phone}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-red-400">Vault timeout.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Main Panel Content (Grid layout) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 xl:h-[780px]">
