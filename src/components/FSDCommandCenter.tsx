@@ -1076,7 +1076,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             onMouseUp={mapEndDrag}
             onMouseLeave={mapEndDrag}
             onWheel={mapOnWheel}
-            className={`flex-1 bg-slate-950 border border-slate-850 p-2.5 relative flex flex-col items-center justify-center overflow-hidden ${
+            className={`flex-1 bg-slate-100 border border-slate-300 p-2.5 relative flex flex-col items-center justify-center overflow-hidden ${
               mapFullscreen ? "h-full rounded-none" : "rounded-xl min-h-[360px]"
             }`}
             style={{ cursor: mapDragRef.current ? "grabbing" : "grab" }}
@@ -2301,139 +2301,180 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 </>
               )}
 
-              {/* Occupants dynamically plotted based on quadrant */}
+              {/* Occupants dynamically plotted based on quadrant — real building coordinates */}
               {occupants.map((occ, idx) => {
-                let coord = { x: 370, y: 250 };
-                if (hasPlan) {
-                  // Place markers over the building footprint of the real plan
-                  // (740x500 viewBox, image letterboxed with meet). Spread
-                  // multiple occupants in a wing so the dots don't overlap.
-                  const zones: Record<string, { x: number; y: number }> = {
-                    NW: { x: 300, y: 140 },
-                    NE: { x: 490, y: 150 },
-                    SW: { x: 290, y: 330 },
-                    SE: { x: 505, y: 345 },
-                    Center: { x: 400, y: 245 },
-                  };
-                  const base = zones[occ.quadrant] || zones.Center;
-                  const ring = idx % 6;
-                  coord = {
-                    x: base.x + ((ring % 3) - 1) * 18,
-                    y: base.y + (Math.floor(ring / 3) - 0.5) * 22,
-                  };
-                } else if (occ.id === "usr_a7f8c9d1") {
-                  coord = { x: 115, y: 155 }; // NW: usr_a7f8c9d1 (Warden, Safe)
-                } else if (occ.id === "usr_c1b2a3d4") {
-                  coord = { x: 145, y: 95 }; // NW: usr_c1b2a3d4 (Occupant, Missing)
-                } else if (occ.id === "usr_b3c7d6e5") {
-                  coord = { x: 535, y: 105 }; // NE: usr_b3c7d6e5 (Occupant, Need Help near flame)
-                } else if (occ.id === "usr_f9e3c2b8") {
-                  coord = { x: 360, y: 270 }; // Center: usr_f9e3c2b8 (Contractor, Missing)
-                } else if (occ.id === "usr_d4e3f2a1") {
-                  coord = { x: 380, y: 320 }; // Center: usr_d4e3f2a1 (FSD Officer, Safe)
-                } else if (occ.id === "usr_e5f6a7b8") {
-                  coord = { x: 605, y: 330 }; // SE: usr_e5f6a7b8 (Occupant, Fall sensor critical)
-                } else {
-                  // Fallback fallback fallback
-                  if (occ.quadrant === "NW") coord = { x: 120, y: 120 };
-                  else if (occ.quadrant === "NE") coord = { x: 510, y: 110 };
-                  else if (occ.quadrant === "SW") coord = { x: 180, y: 360 };
-                  else if (occ.quadrant === "SE") coord = { x: 540, y: 370 };
-                }
+                // Coordinate zones calibrated to the real 4 Irving Plaza building plan
+                // (740x500 viewBox, image letterboxed xMidYMid meet).
+                // Building footprint sits in the right 65% of the image.
+                const zones: Record<string, { x: number; y: number }> = {
+                  NW: { x: 295, y: 205 }, // Upper-left office wing
+                  NE: { x: 540, y: 190 }, // Upper-right / Bank G area
+                  SW: { x: 290, y: 360 }, // Lower-left / Bank E stairs
+                  SE: { x: 545, y: 370 }, // Lower-right / Bank A (Car #14)
+                  Center: { x: 420, y: 280 }, // Central corridor / FCS
+                };
+                const base = zones[occ.quadrant] || zones.Center;
+                // Spread occupants within each zone so dots don't overlap
+                const ring = idx % 8;
+                const spreadX = ((ring % 4) - 1.5) * 20;
+                const spreadY = (Math.floor(ring / 4) - 0.5) * 22;
+                const coord = { x: base.x + spreadX, y: base.y + spreadY };
 
-                const labelColor =
+                // Status colors
+                const statusColor =
                   occ.status === "SAFE"
-                    ? "text-emerald-400"
+                    ? "#10b981"
                     : occ.status === "CRITICAL"
-                      ? "text-red-400 font-bold animate-pulse"
+                      ? "#ef4444"
                       : occ.status === "NEED_HELP"
-                        ? "text-amber-400"
-                        : "text-slate-400";
+                        ? "#f59e0b"
+                        : "#94a3b8";
+
+                const isCritical = occ.status === "CRITICAL";
+                const isNeedHelp = occ.status === "NEED_HELP";
+                const isAlert = isCritical || isNeedHelp;
+                const isARA = occ.mobilityImpaired || occ.isAtARA;
+                const isWearable = occ.wearable;
+
+                // Short role label (2 chars)
+                const roleLabel =
+                  occ.role === "Warden"
+                    ? "W"
+                    : occ.role === "FSD"
+                      ? "F"
+                      : occ.role === "Searcher"
+                        ? "S"
+                        : occ.role === "Deputy"
+                          ? "D"
+                          : occ.role === "Visitor"
+                            ? "V"
+                            : occ.role === "Contractor"
+                              ? "C"
+                              : "O";
 
                 return (
                   <g key={occ.id} className="transition-all duration-500">
-                    {/* Ring highlight for helpful status visibility */}
+                    {/* Outer detection pulse ring (critical/need-help) */}
+                    {isAlert && (
+                      <circle
+                        cx={coord.x}
+                        cy={coord.y}
+                        r="18"
+                        fill="none"
+                        stroke={statusColor}
+                        strokeWidth="2"
+                        strokeOpacity="0.35"
+                        className="animate-ping"
+                        style={{
+                          animationDuration: isCritical ? "0.9s" : "1.6s",
+                          transformOrigin: `${coord.x}px ${coord.y}px`,
+                        }}
+                      />
+                    )}
+                    {/* Secondary ring */}
                     <circle
                       cx={coord.x}
                       cy={coord.y}
-                      r="10"
+                      r="13"
                       fill="none"
-                      stroke={
-                        occ.status === "SAFE"
-                          ? "#10b981"
-                          : occ.status === "CRITICAL"
-                            ? "#ef4444"
-                            : occ.status === "NEED_HELP"
-                              ? "#f59e0b"
-                              : "#94a3b8"
-                      }
-                      strokeWidth="1"
-                      strokeDasharray="2 2"
-                      className={
-                        occ.status === "CRITICAL" || occ.status === "NEED_HELP"
-                          ? "animate-spin"
-                          : ""
-                      }
+                      stroke={statusColor}
+                      strokeWidth="1.5"
+                      strokeDasharray={isAlert ? "none" : "3 3"}
+                      strokeOpacity={isAlert ? "0.7" : "0.5"}
+                      className={isAlert ? "animate-pulse" : ""}
                       style={{
+                        animationDuration: "2s",
                         transformOrigin: `${coord.x}px ${coord.y}px`,
-                        animationDuration: "5s",
                       }}
                     />
+                    {/* Main occupant dot */}
                     <circle
                       cx={coord.x}
                       cy={coord.y}
-                      r="6.5"
-                      fill={
-                        occ.status === "SAFE"
-                          ? "#10b981"
-                          : occ.status === "CRITICAL"
-                            ? "#ef4444"
-                            : occ.status === "NEED_HELP"
-                              ? "#f59e0b"
-                              : "#94a3b8"
-                      }
-                      stroke="#0f172a"
-                      strokeWidth="1.8"
+                      r="9"
+                      fill={statusColor}
+                      stroke="white"
+                      strokeWidth="2"
                     />
+                    {/* Role character inside dot */}
                     <text
                       x={coord.x}
-                      y={coord.y - 12}
-                      fill="#cbd5e1"
-                      fontSize="7"
+                      y={coord.y + 3.5}
+                      fill="white"
+                      fontSize="8"
+                      fontFamily="system-ui, sans-serif"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      {roleLabel}
+                    </text>
+                    {/* ARA wheelchair icon */}
+                    {isARA && (
+                      <text
+                        x={coord.x + 11}
+                        y={coord.y - 7}
+                        fontSize="9"
+                        textAnchor="middle"
+                      >
+                        ♿
+                      </text>
+                    )}
+                    {/* Wearable sensor icon */}
+                    {isWearable && (
+                      <text
+                        x={coord.x - 11}
+                        y={coord.y - 7}
+                        fontSize="9"
+                        textAnchor="middle"
+                      >
+                        📡
+                      </text>
+                    )}
+                    {/* Name label */}
+                    <text
+                      x={coord.x}
+                      y={coord.y + 23}
+                      fill={
+                        occ.status === "SAFE"
+                          ? "#059669"
+                          : occ.status === "CRITICAL"
+                            ? "#dc2626"
+                            : occ.status === "NEED_HELP"
+                              ? "#d97706"
+                              : "#475569"
+                      }
+                      fontSize="7.5"
                       fontFamily="monospace"
                       fontWeight="bold"
                       textAnchor="middle"
-                      className={labelColor}
                     >
-                      {occ.id.replace("usr_", "").toUpperCase()}
+                      {occ.badgeId}
                     </text>
                   </g>
                 );
               })}
             </svg>
 
-            {/* Map Legend Overlay */}
-            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap justify-between items-center gap-2 bg-slate-900/95 p-2 rounded-xl border border-slate-800 text-xs font-mono text-slate-300">
-              <div className="flex flex-wrap gap-2.5">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />{" "}
-                  Accounted Safe
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />{" "}
-                  Need Help
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />{" "}
-                  Critical (Fall Sensor)
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />{" "}
-                  Missing / Unverified
-                </span>
-              </div>
-              <span className="text-xs text-slate-500 hidden md:inline">
-                Click any Stairway to assess structural clearance
+            {/* Map Legend — light theme */}
+            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center gap-3 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold text-slate-700">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />{" "}
+                Safe
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />{" "}
+                Need Help
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />{" "}
+                Critical / Fall
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-slate-400 inline-block" />{" "}
+                Missing
+              </span>
+              <span className="flex items-center gap-1.5 ml-auto text-slate-400 font-normal italic">
+                Drag to pan · scroll to zoom
               </span>
             </div>
           </div>
@@ -2869,6 +2910,136 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           </div>
         );
       })()}
+
+      {/* ── ACTION PIPELINE — shows start-to-end flow for each ledger event ── */}
+      <div className="mt-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-base font-black text-slate-800 uppercase tracking-wide">
+              Action Pipeline
+            </span>
+          </div>
+          <span className="text-xs text-slate-500 font-mono">
+            Start → Validate → Encrypt → Chain → Confirm
+          </span>
+        </div>
+
+        <div className="space-y-2 overflow-y-auto max-h-44 no-scrollbar">
+          {ledger
+            .slice()
+            .reverse()
+            .slice(0, 8)
+            .map((block, i) => {
+              // Classify the event type
+              const isCritical =
+                block.event.toLowerCase().includes("critical") ||
+                block.event.toLowerCase().includes("fall");
+              const isSafe = block.event.toLowerCase().includes("safe");
+              const isDirective =
+                block.event.toLowerCase().includes("directive") ||
+                block.event.toLowerCase().includes("broadcast");
+              const isMesh =
+                block.event.toLowerCase().includes("mesh") ||
+                block.event.toLowerCase().includes("hmac");
+              const isFamily =
+                block.event.toLowerCase().includes("family") ||
+                block.event.toLowerCase().includes("sms");
+              const isAlarm =
+                block.event.toLowerCase().includes("alarm") ||
+                block.event.toLowerCase().includes("fire");
+
+              const typeColor = isCritical
+                ? "text-red-700 bg-red-100 border-red-300"
+                : isSafe
+                  ? "text-emerald-700 bg-emerald-100 border-emerald-300"
+                  : isDirective
+                    ? "text-amber-700 bg-amber-100 border-amber-300"
+                    : isMesh
+                      ? "text-yellow-700 bg-yellow-100 border-yellow-300"
+                      : isFamily
+                        ? "text-blue-700 bg-blue-100 border-blue-300"
+                        : isAlarm
+                          ? "text-red-700 bg-red-100 border-red-300"
+                          : "text-slate-700 bg-slate-100 border-slate-300";
+
+              const typeLabel = isCritical
+                ? "CRITICAL"
+                : isSafe
+                  ? "CHECK-IN"
+                  : isDirective
+                    ? "DIRECTIVE"
+                    : isMesh
+                      ? "MESH SYNC"
+                      : isFamily
+                        ? "FAMILY SMS"
+                        : isAlarm
+                          ? "ALARM"
+                          : "SYSTEM";
+
+              // Pipeline steps — all complete for past events (ledger blocks are immutable)
+              const steps = [
+                { label: "Trigger", done: true, icon: "⚡" },
+                { label: "Validate", done: true, icon: "✓" },
+                { label: "Encrypt", done: true, icon: "🔒" },
+                { label: "Chain", done: true, icon: "⛓" },
+                { label: "Confirmed", done: true, icon: "✅" },
+              ];
+
+              return (
+                <div
+                  key={block.index}
+                  className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5"
+                >
+                  {/* Event type badge */}
+                  <span
+                    className={`text-xs font-black px-2 py-1 rounded-lg border shrink-0 font-mono ${typeColor}`}
+                  >
+                    {typeLabel}
+                  </span>
+
+                  {/* Event description */}
+                  <span className="text-xs text-slate-600 font-medium truncate flex-1 min-w-0">
+                    {block.event.length > 60
+                      ? block.event.slice(0, 60) + "…"
+                      : block.event}
+                  </span>
+
+                  {/* Pipeline steps */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {steps.map((step, si) => (
+                      <div key={si} className="flex items-center gap-1">
+                        <div
+                          title={step.label}
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-emerald-100 text-emerald-700 border border-emerald-300 shrink-0"
+                        >
+                          {step.icon}
+                        </div>
+                        {si < steps.length - 1 && (
+                          <div className="w-3 h-0.5 bg-emerald-300 shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Block number + hash */}
+                  <div className="text-xs font-mono text-slate-400 shrink-0 text-right hidden lg:block">
+                    <div className="font-bold text-slate-600">
+                      #{block.index}
+                    </div>
+                    <div className="text-[10px]">{block.hash.slice(0, 8)}…</div>
+                  </div>
+                </div>
+              );
+            })}
+          {ledger.length === 0 && (
+            <div className="text-center py-6 text-slate-400 text-sm">
+              No pipeline events yet. Actions will appear here as they are
+              recorded.
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Down Layer bento expansions */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-5">
