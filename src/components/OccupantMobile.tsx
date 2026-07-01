@@ -386,31 +386,31 @@ export default function OccupantMobile({
                 type="button"
                 onClick={() => setShowBuildingMap(true)}
                 aria-label="Open full building map"
-                className="w-full relative bg-white border-2 border-slate-300 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-500 transition-all group"
+                className="w-full relative bg-white border-2 border-blue-400 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-600 hover:shadow-lg transition-all group"
               >
                 <img
                   src="/building-plan.png"
                   alt="4 Irving Place building plan showing elevator banks, stairs and exits"
-                  className="w-full h-36 object-cover object-top"
+                  className="w-full h-44 object-contain bg-white p-1"
                 />
-                <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-900/10 transition-all flex items-center justify-center">
-                  <span className="bg-white/95 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-300 shadow-sm flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                    <Maximize2 size={13} /> Tap to enlarge
+                <div className="absolute bottom-0 left-0 right-0 bg-blue-600 px-3 py-2 flex items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-white">
+                    4 Irving Place · Elevator banks, stairs &amp; exits
+                  </p>
+                  <span className="flex items-center gap-1 text-xs text-blue-100 font-semibold shrink-0">
+                    <Maximize2 size={12} /> Full map
                   </span>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-slate-900/80 px-3 py-1.5">
-                  <p className="text-xs font-bold text-white">
-                    4 Irving Place · Elevator banks, stairs &amp; FD exits
-                  </p>
-                </div>
               </button>
-              <p className="text-xs text-slate-500 mt-2 leading-snug">
-                Locate your nearest{" "}
-                <span className="font-bold text-slate-300">
+              <p className="text-xs text-slate-400 mt-2 leading-snug">
+                Locate{" "}
+                <span className="font-black text-emerald-700">
                   Stair A (North)
                 </span>{" "}
-                exit and the main lobby before an emergency. Tap the map to
-                enlarge.
+                and the main lobby before an emergency.{" "}
+                <span className="font-semibold text-blue-700">
+                  Tap the map to enlarge.
+                </span>
               </p>
             </section>
 
@@ -977,23 +977,50 @@ export default function OccupantMobile({
                 <X size={18} />
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-3 bg-slate-50">
-              <img
-                src="/building-plan.png"
-                alt="Full 4 Irving Place building plan with elevator banks, stairs, standpipes and FD connections"
-                className="w-full h-auto rounded-lg border border-slate-200"
-              />
+            <div className="flex-1 overflow-auto bg-slate-50">
+              {/* Building overview */}
+              <div className="p-3 border-b border-slate-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">
+                    1
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    Building Overview — Elevator Banks &amp; Stairs
+                  </span>
+                </div>
+                <img
+                  src="/building-plan.png"
+                  alt="Full 4 Irving Place building plan with elevator banks, stairs, standpipes and FD connections"
+                  className="w-full h-auto rounded-xl border-2 border-slate-200"
+                />
+              </div>
+
+              {/* Floor 7 As-Built */}
+              <div className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-black shrink-0">
+                    2
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    Floor 7 As-Built — Your Workspace
+                  </span>
+                </div>
+                <img
+                  src="/floor7-plan.png"
+                  alt="7th floor As-Built plan showing all office suites, elevator lobbies C/D/E/G, stairs A/B/C/D"
+                  className="w-full h-auto rounded-xl border-2 border-slate-200"
+                />
+              </div>
             </div>
             <div className="px-4 py-3 border-t border-slate-200 bg-white">
-              <p className="text-xs text-slate-500 leading-snug">
-                <span className="font-bold text-slate-300">
-                  Elevator banks A–T
-                </span>
-                , stairwells, standpipes and FD connections. In a fire, use{" "}
-                <span className="font-bold text-emerald-700">
+              <p className="text-xs text-slate-400 leading-snug">
+                Find{" "}
+                <span className="font-black text-emerald-700">
                   Stair A (North)
                 </span>{" "}
-                — never elevators.
+                on Floor 7 and the{" "}
+                <span className="font-black text-blue-700">Bank A Car #14</span>{" "}
+                elevator (FSD/FDNY only). In a fire, use stairs only.
               </p>
             </div>
           </div>
