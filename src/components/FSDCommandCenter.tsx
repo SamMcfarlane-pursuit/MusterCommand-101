@@ -208,12 +208,12 @@ export default function FSDCommandCenter({
   const mapBoxRef = useRef<HTMLDivElement>(null);
   const mapDragRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Preload the real building plan; only use it if it genuinely decodes.
+  // Preload the real 7th-floor As-Built plan; only use it if it genuinely decodes.
   useEffect(() => {
     const img = new Image();
     img.onload = () => setHasPlan(true);
     img.onerror = () => setHasPlan(false);
-    img.src = "/building-plan.png";
+    img.src = "/floor7-plan.png";
     return () => {
       img.onload = null;
       img.onerror = null;
@@ -1060,7 +1060,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 Interactive Architectural Map
               </span>
               <h3 className="text-sm font-bold text-slate-200 uppercase font-sans">
-                Floor 7 Pilot Plan (4 Irving Plaza)
+                7th Floor As-Built — 4 Irving Place HQ
               </h3>
             </div>
             <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-mono">
@@ -2289,9 +2289,9 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   drawn schematic when present so the map matches the actual sheet. */}
               {hasPlan && (
                 <>
-                  <rect x="0" y="0" width="740" height="500" fill="#0a0e19" />
+                  <rect x="0" y="0" width="740" height="500" fill="#ffffff" />
                   <image
-                    href="/building-plan.png"
+                    href="/floor7-plan.png"
                     x="0"
                     y="0"
                     width="740"
@@ -2303,15 +2303,15 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
 
               {/* Occupants dynamically plotted based on quadrant — real building coordinates */}
               {occupants.map((occ, idx) => {
-                // Coordinate zones calibrated to the real 4 Irving Plaza building plan
-                // (740x500 viewBox, image letterboxed xMidYMid meet).
-                // Building footprint sits in the right 65% of the image.
+                // Coordinate zones calibrated to the real 7th-floor As-Built plan
+                // (floor7-plan.png, 740x500 viewBox, xMidYMid meet, ~10px top letterbox).
+                // West = Irving Place, East = Third Ave, North = E 15th, South = E 14th.
                 const zones: Record<string, { x: number; y: number }> = {
-                  NW: { x: 295, y: 205 }, // Upper-left office wing
-                  NE: { x: 540, y: 190 }, // Upper-right / Bank G area
-                  SW: { x: 290, y: 360 }, // Lower-left / Bank E stairs
-                  SE: { x: 545, y: 370 }, // Lower-right / Bank A (Car #14)
-                  Center: { x: 420, y: 280 }, // Central corridor / FCS
+                  NW: { x: 160, y: 135 }, // 07-800 Strategic Planning (Irving Pl / E15)
+                  NE: { x: 470, y: 130 }, // 07-240 / 07-280 IRS (Third Ave / E15)
+                  SW: { x: 180, y: 300 }, // 07-700 AMI Implementation (Irving Pl / E14)
+                  SE: { x: 480, y: 305 }, // 07-400s office block (Third Ave / E14)
+                  Center: { x: 335, y: 215 }, // ELEV LOBBY C / courtyard core
                 };
                 const base = zones[occ.quadrant] || zones.Center;
                 // Spread occupants within each zone so dots don't overlap

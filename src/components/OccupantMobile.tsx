@@ -15,6 +15,9 @@ import {
   MapPin,
   User,
   Radio,
+  Map,
+  Maximize2,
+  X,
 } from "lucide-react";
 import { Occupant } from "../types";
 import { sanitizeText, validateBadgeSyntax } from "../utils";
@@ -152,6 +155,7 @@ export default function OccupantMobile({
   const [isFallSensorEnabled, setIsFallSensorEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showBuildingMap, setShowBuildingMap] = useState(false);
 
   // ── Handlers (all logic preserved) ─────────────────────────────────────────
   const handleCheckIn = (status: "SAFE" | "NEED_HELP") => {
@@ -365,8 +369,52 @@ export default function OccupantMobile({
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 space-y-5">
         {activeScreen === "PROTOCOL" ? (
           <>
-            {/* ── STEP 1: YOUR EVACUATION ROUTE ───────────────────────────── */}
-            {/* ── STEP 1: YOUR EVACUATION ROUTE ─────────────────── */}
+            {/* ── KNOW YOUR BUILDING — orientation map at the front ───── */}
+            <section aria-labelledby="building-heading">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                  <Map size={15} />
+                </span>
+                <h3
+                  id="building-heading"
+                  className="text-sm font-black text-slate-200 uppercase tracking-wide"
+                >
+                  Know Your Building
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBuildingMap(true)}
+                aria-label="Open full building map"
+                className="w-full relative bg-white border-2 border-slate-300 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-500 transition-all group"
+              >
+                <img
+                  src="/building-plan.png"
+                  alt="4 Irving Place building plan showing elevator banks, stairs and exits"
+                  className="w-full h-36 object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-900/10 transition-all flex items-center justify-center">
+                  <span className="bg-white/95 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-300 shadow-sm flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                    <Maximize2 size={13} /> Tap to enlarge
+                  </span>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-slate-900/80 px-3 py-1.5">
+                  <p className="text-xs font-bold text-white">
+                    4 Irving Place · Elevator banks, stairs &amp; FD exits
+                  </p>
+                </div>
+              </button>
+              <p className="text-xs text-slate-500 mt-2 leading-snug">
+                Locate your nearest{" "}
+                <span className="font-bold text-slate-300">
+                  Stair A (North)
+                </span>{" "}
+                exit and the main lobby before an emergency. Tap the map to
+                enlarge.
+              </p>
+            </section>
+
+            {/* ── STEP 1: YOUR EVACUATION ROUTE ───────────────── */}
             <section aria-labelledby="step1-heading">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center text-sm font-black shrink-0">
@@ -900,6 +948,57 @@ export default function OccupantMobile({
           </button>
         </div>
       </div>
+
+      {/* ── FULLSCREEN BUILDING MAP MODAL ──────────────────────── */}
+      {showBuildingMap && (
+        <div
+          role="dialog"
+          aria-label="Building map"
+          className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setShowBuildingMap(false)}
+        >
+          <div
+            className="bg-white rounded-2xl border border-slate-300 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-blue-600">
+              <div className="flex items-center gap-2">
+                <Map size={18} className="text-white" />
+                <span className="text-sm font-black text-white uppercase tracking-wide">
+                  Know Your Building — 4 Irving Place
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBuildingMap(false)}
+                aria-label="Close building map"
+                className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-3 bg-slate-50">
+              <img
+                src="/building-plan.png"
+                alt="Full 4 Irving Place building plan with elevator banks, stairs, standpipes and FD connections"
+                className="w-full h-auto rounded-lg border border-slate-200"
+              />
+            </div>
+            <div className="px-4 py-3 border-t border-slate-200 bg-white">
+              <p className="text-xs text-slate-500 leading-snug">
+                <span className="font-bold text-slate-300">
+                  Elevator banks A–T
+                </span>
+                , stairwells, standpipes and FD connections. In a fire, use{" "}
+                <span className="font-bold text-emerald-700">
+                  Stair A (North)
+                </span>{" "}
+                — never elevators.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
