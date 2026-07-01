@@ -277,7 +277,7 @@ export default function OccupantMobile({
                   ? "text-red-700"
                   : occupant.status === "NEED_HELP"
                     ? "text-amber-700"
-                    : "text-slate-700"
+                    : "text-slate-300"
             }`}
           >
             {sc.label}
@@ -301,7 +301,7 @@ export default function OccupantMobile({
           </span>
         </div>
         <div className="px-3 py-2.5">
-          <p className="text-sm font-semibold text-slate-800 leading-snug">
+          <p className="text-sm font-semibold text-slate-200 leading-snug">
             {activeDirective}
           </p>
           {stairBBlocked && (
@@ -347,7 +347,7 @@ export default function OccupantMobile({
             className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
               activeScreen === tab.id
                 ? "bg-slate-900 text-slate-100 border border-slate-700 shadow-sm"
-                : "text-slate-400 hover:text-slate-900"
+                : "text-slate-400 hover:text-slate-100"
             }`}
           >
             {tab.dot && (
@@ -366,6 +366,7 @@ export default function OccupantMobile({
         {activeScreen === "PROTOCOL" ? (
           <>
             {/* ── STEP 1: YOUR EVACUATION ROUTE ───────────────────────────── */}
+            {/* ── STEP 1: YOUR EVACUATION ROUTE ─────────────────── */}
             <section aria-labelledby="step1-heading">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center text-sm font-black shrink-0">
@@ -379,51 +380,107 @@ export default function OccupantMobile({
                 </h3>
               </div>
 
-              {/* 3-step route indicator */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center text-center gap-1.5">
-                  <DoorOpen size={22} className="text-emerald-500" />
-                  <span className="text-xs text-slate-400 font-mono leading-none">
-                    Exit
-                  </span>
-                  <span className="text-sm font-bold text-slate-100 leading-tight">
-                    Stair A (North)
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center text-center gap-1.5 w-full">
-                    <MapPin size={22} className="text-blue-500" />
-                    <span className="text-xs text-slate-400 font-mono leading-none">
-                      Assemble
-                    </span>
-                    <span className="text-xs font-bold text-slate-100 leading-tight text-center">
-                      {selectedZone === "Zone A" ? "Stuyvesant Sq" : "Union Sq"}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`rounded-xl p-3 flex flex-col items-center text-center gap-1.5 border ${
-                    checkedIn
-                      ? "bg-emerald-50 border-emerald-300"
-                      : "bg-slate-950/60 border-slate-800"
-                  }`}
-                >
-                  <CheckCircle
-                    size={22}
-                    className={
-                      checkedIn ? "text-emerald-600" : "text-slate-500"
-                    }
+              {/* Stair blocked warning */}
+              {stairBBlocked && (
+                <div className="mb-3 bg-yellow-100 border-2 border-yellow-500 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                  <AlertTriangle
+                    size={16}
+                    className="text-yellow-700 shrink-0"
                   />
-                  <span className="text-xs text-slate-400 font-mono leading-none">
-                    Check In
-                  </span>
+                  <p className="text-xs font-black text-yellow-900 uppercase tracking-wide">
+                    Stair B BLOCKED — Use Stair A (North) only
+                  </p>
+                </div>
+              )}
+
+              {/* 3-step route — clear, full names, color-coded */}
+              <div className="flex flex-col gap-2">
+                {/* Step A: Exit */}
+                <div className="bg-emerald-50 border-2 border-emerald-400 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                    <DoorOpen size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-emerald-700 uppercase tracking-wide mb-0.5">
+                      A · Exit the Floor
+                    </div>
+                    <div className="text-sm font-black text-emerald-900">
+                      {stairBBlocked
+                        ? "Stair A (North) — ONLY ROUTE"
+                        : "Stair A (North) • 7th Fl Corridor"}
+                    </div>
+                    <div className="text-xs text-emerald-700 mt-0.5">
+                      Do NOT use elevators. Stairs only.
+                    </div>
+                  </div>
+                  <CheckCircle
+                    size={18}
+                    className="text-emerald-500 shrink-0"
+                  />
+                </div>
+
+                {/* Step B: Assemble — dynamically matches selected zone */}
+                <div className="bg-blue-50 border-2 border-blue-400 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                    <MapPin size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-0.5">
+                      B · Assemble Outside
+                    </div>
+                    <div className="text-sm font-black text-blue-900">
+                      {selectedZone === "Zone A"
+                        ? "Stuyvesant Square Park"
+                        : "Union Square Park"}
+                    </div>
+                    <div className="text-xs text-blue-700 mt-0.5">
+                      {selectedZone === "Zone A"
+                        ? "Between 17th & 15th St — PRIMARY zone"
+                        : "Along East 14th St — SECONDARY zone"}
+                    </div>
+                  </div>
                   <span
-                    className={`text-sm font-bold leading-tight ${
-                      checkedIn ? "text-emerald-700" : "text-slate-100"
+                    className={`text-xs font-black px-2 py-1 rounded-lg border ${
+                      selectedZone === "Zone A"
+                        ? "bg-emerald-100 text-emerald-700 border-emerald-400"
+                        : "bg-blue-100 text-blue-700 border-blue-400"
                     }`}
                   >
-                    {checkedIn ? "✓ Done" : "Tap below"}
+                    {selectedZone === "Zone A" ? "PRIMARY" : "SECONDARY"}
                   </span>
+                </div>
+
+                {/* Step C: Check in */}
+                <div
+                  className={`rounded-xl px-4 py-3 flex items-center gap-3 border-2 ${
+                    checkedIn
+                      ? "bg-emerald-50 border-emerald-400"
+                      : "bg-slate-50 border-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                      checkedIn ? "bg-emerald-500" : "bg-slate-300"
+                    }`}
+                  >
+                    <CheckCircle size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div
+                      className={`text-xs font-bold uppercase tracking-wide mb-0.5 ${
+                        checkedIn ? "text-emerald-700" : "text-slate-500"
+                      }`}
+                    >
+                      C · Check In with Warden
+                    </div>
+                    <div
+                      className={`text-sm font-black ${
+                        checkedIn ? "text-emerald-900" : "text-slate-400"
+                      }`}
+                    >
+                      {checkedIn ? "✓ Accounted for" : "Tap I'M SAFE below"}
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -461,7 +518,7 @@ export default function OccupantMobile({
                         aria-label={z.label}
                       />
                       <span
-                        className={`text-sm font-semibold ${selectedZone === z.id ? "text-slate-800" : "text-slate-200"}`}
+                        className={`text-sm font-semibold ${selectedZone === z.id ? "text-slate-200" : "text-slate-200"}`}
                       >
                         {z.label}
                       </span>

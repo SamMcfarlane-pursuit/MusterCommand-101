@@ -250,7 +250,7 @@ export default function WardenTablet({
   const araStaged = araAll.filter((o) => Boolean(o.isAtARA));
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-slate-200 p-5 shadow-2xl flex flex-col min-h-[600px] relative text-slate-800 overflow-hidden">
+    <div className="w-full bg-white rounded-3xl border border-slate-200 p-5 shadow-2xl flex flex-col min-h-[600px] relative text-slate-200 overflow-hidden">
       {/* Kiosk Status Header */}
       <div className="flex justify-between items-center border-b border-slate-200 pb-4 mb-4">
         <div>
@@ -295,7 +295,7 @@ export default function WardenTablet({
                 <span className="text-sm font-bold text-red-700 uppercase tracking-widest block mb-1">
                   ⚠️ PRIORITY SOS PANIC ACTIVE
                 </span>
-                <p className="text-base text-slate-700 font-sans leading-relaxed">
+                <p className="text-base text-slate-300 font-sans leading-relaxed">
                   Crisis beacon active for occupant{" "}
                   <span className="font-bold text-white bg-red-600 px-2 py-0.5 rounded font-mono select-all ml-1">
                     {occupants.find((o) => o.status === "CRITICAL")?.id}
@@ -330,7 +330,7 @@ export default function WardenTablet({
           <span className="text-xs font-bold uppercase tracking-wider text-amber-600 block mb-1.5">
             🚨 FSD DIRECTIVE — ACTION REQUIRED
           </span>
-          <p className="text-base text-slate-800 font-sans font-semibold leading-relaxed">
+          <p className="text-base text-slate-200 font-sans font-semibold leading-relaxed">
             {activeDirective}
           </p>
         </div>
@@ -393,8 +393,8 @@ export default function WardenTablet({
                 aria-selected={activeScanMode === "RFID"}
                 className={`py-3 text-sm font-mono font-bold rounded-lg transition-all uppercase cursor-pointer ${
                   activeScanMode === "RFID"
-                    ? "bg-white text-slate-800 border border-slate-300 shadow"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-white text-slate-200 border border-slate-300 shadow"
+                    : "text-slate-500 hover:text-slate-300"
                 }`}
                 id="tab-scan-rfid"
               >
@@ -409,8 +409,8 @@ export default function WardenTablet({
                 aria-selected={activeScanMode === "QR"}
                 className={`py-3 text-sm font-mono font-bold rounded-lg transition-all uppercase flex items-center justify-center gap-2 cursor-pointer ${
                   activeScanMode === "QR"
-                    ? "bg-white text-slate-800 border border-slate-300 shadow"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-white text-slate-200 border border-slate-300 shadow"
+                    : "text-slate-500 hover:text-slate-300"
                 }`}
                 id="tab-scan-qr"
               >
@@ -422,7 +422,7 @@ export default function WardenTablet({
             {activeScanMode === "RFID" ? (
               <>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-base font-bold font-mono tracking-wider text-slate-700 uppercase">
+                  <h3 className="text-base font-bold font-mono tracking-wider text-slate-300 uppercase">
                     RFID Badge Gateway
                   </h3>
                   <span className="text-xs bg-indigo-100 text-indigo-700 border border-indigo-300 px-2.5 py-1 rounded-lg font-mono font-bold">
@@ -452,7 +452,7 @@ export default function WardenTablet({
                     readOnly
                     aria-label="Badge registration code"
                     placeholder="REGISTRATION CODE: e.g. NW112233"
-                    className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 text-center font-mono text-base text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 text-center font-mono text-base text-slate-200 placeholder:text-slate-400 focus:outline-none"
                   />
                 </div>
 
@@ -471,7 +471,7 @@ export default function WardenTablet({
                     <button
                       key={num}
                       onClick={() => handleKeypadPress(num)}
-                      className="bg-white hover:bg-slate-50 text-slate-800 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
+                      className="bg-white hover:bg-slate-50 text-slate-200 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
                     >
                       {num}
                     </button>
@@ -480,7 +480,7 @@ export default function WardenTablet({
                     <button
                       key={num}
                       onClick={() => handleKeypadPress(num)}
-                      className="bg-white hover:bg-slate-50 text-slate-800 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
+                      className="bg-white hover:bg-slate-50 text-slate-200 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
                     >
                       {num}
                     </button>
@@ -490,7 +490,7 @@ export default function WardenTablet({
                       <button
                         key={num}
                         onClick={() => handleKeypadPress(num)}
-                        className="bg-white hover:bg-slate-50 text-slate-800 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
+                        className="bg-white hover:bg-slate-50 text-slate-200 font-mono text-base font-bold py-3 rounded-lg border border-slate-300 select-none active:bg-slate-100 cursor-pointer"
                       >
                         {num}
                       </button>
@@ -514,7 +514,7 @@ export default function WardenTablet({
               /* QR CODE SCANNER VIEWPORT */
               <div className="space-y-4 animate-fadeIn">
                 <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <h3 className="text-base font-bold font-mono tracking-wider text-slate-700 uppercase">
+                  <h3 className="text-base font-bold font-mono tracking-wider text-slate-300 uppercase">
                     Muster Scan Reader
                   </h3>
                   <span
@@ -602,7 +602,7 @@ export default function WardenTablet({
                       value={selectedQrUser}
                       aria-label="Target mobile occupant to scan"
                       onChange={(e) => setSelectedQrUser(e.target.value)}
-                      className="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-700 font-mono focus:outline-none"
+                      className="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-300 font-mono focus:outline-none"
                     >
                       <option value="">-- Choose scannable user --</option>
                       {occupants.map((occ) => (
@@ -708,7 +708,7 @@ export default function WardenTablet({
                 </span>
               </div>
             ) : decryptedProfile ? (
-              <div className="text-slate-700 flex items-start gap-3 mt-2 animate-fadeIn">
+              <div className="text-slate-300 flex items-start gap-3 mt-2 animate-fadeIn">
                 <img
                   src={decryptedProfile.photo}
                   alt="Decrypted occupant preview"
@@ -716,7 +716,7 @@ export default function WardenTablet({
                   className="w-14 h-14 rounded-xl object-cover border border-slate-300 bg-slate-100 shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-base font-bold text-slate-800 flex items-center justify-between">
+                  <div className="text-base font-bold text-slate-200 flex items-center justify-between">
                     <span>{decryptedProfile.name}</span>
                     <span className="text-xs font-mono text-slate-500 font-normal">
                       Decrypted
@@ -779,7 +779,7 @@ export default function WardenTablet({
                   aria-label="Filter sector roster"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
               </div>
             </div>
@@ -830,7 +830,7 @@ export default function WardenTablet({
                 className={`py-2.5 text-sm font-mono font-bold rounded-lg transition-all ${
                   activeTab === "MISSING"
                     ? "bg-red-100 text-red-700 border border-red-300"
-                    : "text-slate-500 hover:text-slate-700"
+                    : "text-slate-500 hover:text-slate-300"
                 }`}
               >
                 MISSING ({missingCount})
@@ -845,7 +845,7 @@ export default function WardenTablet({
                     ? "bg-amber-100 text-amber-700 border border-amber-300"
                     : visitorUnaccounted > 0
                       ? "text-amber-500 hover:text-amber-700"
-                      : "text-slate-500 hover:text-slate-700"
+                      : "text-slate-500 hover:text-slate-300"
                 }`}
               >
                 VISITORS ({visitorCount})
@@ -858,7 +858,7 @@ export default function WardenTablet({
                 className={`py-2.5 text-sm font-mono font-bold rounded-lg transition-all ${
                   activeTab === "SAFE"
                     ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
-                    : "text-slate-500 hover:text-slate-700"
+                    : "text-slate-500 hover:text-slate-300"
                 }`}
               >
                 SAFE ({safeCount})
@@ -895,7 +895,7 @@ export default function WardenTablet({
                         }`}
                       />
                       <div>
-                        <div className="text-sm font-bold text-slate-800 flex items-center gap-1.5 flex-wrap">
+                        <div className="text-sm font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
                           {occ.id === decryptedToken && decryptedProfile
                             ? decryptedProfile.name
                             : occ.nameEncrypted}
@@ -933,7 +933,7 @@ export default function WardenTablet({
                               ? "bg-red-100 text-red-700 border-red-300"
                               : occ.status === "NEED_HELP"
                                 ? "bg-yellow-100 text-yellow-800 border-yellow-300"
-                                : "bg-slate-100 text-slate-700 border-slate-300"
+                                : "bg-slate-100 text-slate-300 border-slate-300"
                         }`}
                       >
                         {occ.status}
@@ -971,7 +971,7 @@ export default function WardenTablet({
                     "Incident Host successfully notified via Bluetooth Mesh packet sync!",
                   );
                 }}
-                className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-sm font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-200 text-sm font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
               >
                 <AlertOctagon size={15} className="text-amber-500" />
                 NOTIFY HOST

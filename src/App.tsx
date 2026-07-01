@@ -392,7 +392,7 @@ export default function App() {
                 className={`px-3.5 py-1.5 rounded-lg font-mono font-bold text-xs transition-all uppercase cursor-pointer ${
                   isBlackout
                     ? "bg-yellow-600 text-slate-950"
-                    : "bg-slate-800 text-slate-300 hover:text-slate-900 hover:bg-slate-700"
+                    : "bg-slate-800 text-slate-300 hover:text-slate-100 hover:bg-slate-700"
                 }`}
               >
                 {isBlackout ? "● Active" : "Trigger"}

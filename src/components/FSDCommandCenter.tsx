@@ -416,7 +416,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
   );
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col text-slate-800">
+    <div className="w-full bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col text-slate-200">
       {/* Commanding Header Ribbon */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-5 mb-5 gap-4">
         <div>
@@ -424,7 +424,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             <span className="bg-red-600 text-white font-black text-xs uppercase font-mono px-3 py-1 rounded-lg tracking-widest animate-pulse">
               INCIDENT ACTIVE
             </span>
-            <h2 className="text-xl font-black tracking-tight text-slate-800">
+            <h2 className="text-xl font-black tracking-tight text-slate-200">
               Command Deck
               <span className="text-slate-500 font-normal text-base ml-2">
                 FSD Station
@@ -434,7 +434,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="text-sm text-slate-600 font-mono mt-2 flex items-center gap-3 flex-wrap">
             <span>Floor 7 · 4 Irving Plaza</span>
             <span className="text-slate-400">·</span>
-            <span className="flex items-center gap-1.5 font-bold text-slate-700">
+            <span className="flex items-center gap-1.5 font-bold text-slate-300">
               <Clock size={13} className="text-red-600 animate-spin" />
               <span>ELAPSED: {formatElapsed(elapsedSeconds)}</span>
             </span>
@@ -465,7 +465,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               setElapsedSeconds(0);
               onLogEvent("FSD manually reset the incident elapsed timer.");
             }}
-            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-sm py-2.5 px-4 rounded-xl flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-300 font-bold text-sm py-2.5 px-4 rounded-xl flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
           >
             <RefreshCw size={14} className="text-amber-500" />
             Reset Timer
@@ -475,7 +475,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
               stairBBlocked
                 ? "bg-yellow-100 text-yellow-700 border-yellow-300"
-                : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
+                : "bg-slate-100 text-slate-300 border-slate-300 hover:bg-slate-200"
             }`}
           >
             {stairBBlocked ? "⚠️ Stair B BLOCKED" : "Block Stair B"}
@@ -551,7 +551,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
 
                     {/* Name + IDs */}
                     <div>
-                      <p className="text-base font-bold text-slate-800 leading-tight">
+                      <p className="text-base font-bold text-slate-200 leading-tight">
                         {isOpen && unsealedDetails
                           ? unsealedDetails.name
                           : o.nameEncrypted}
@@ -573,7 +573,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                       className={`w-full py-2.5 rounded-xl text-sm font-bold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         isOpen
                           ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
-                          : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
+                          : "bg-slate-100 text-slate-300 border-slate-300 hover:bg-slate-200"
                       }`}
                     >
                       <Unlock size={14} />
@@ -604,7 +604,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                               className="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 shrink-0"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-slate-800 truncate">
+                              <p className="text-sm font-bold text-slate-200 truncate">
                                 {unsealedDetails.name}
                               </p>
                               <p className="text-xs text-slate-600 font-medium">
@@ -656,7 +656,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <div className="text-xs font-mono text-slate-500 uppercase tracking-wider">
                 Active
               </div>
-              <div className="text-sm font-bold text-slate-800 mt-0.5">
+              <div className="text-sm font-bold text-slate-200 mt-0.5">
                 {
                   EAP_EMERGENCY_TYPES.find((e) => e.id === selectedEmergency)
                     ?.icon
@@ -679,7 +679,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 <CheckCircle size={16} />
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-slate-800 leading-tight">
+                <div className="text-xs font-bold text-slate-200 leading-tight">
                   1 · Classify
                 </div>
                 <div className="text-xs text-amber-600 font-semibold truncate">
@@ -694,7 +694,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 <CheckCircle size={16} />
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-slate-800 leading-tight">
+                <div className="text-xs font-bold text-slate-200 leading-tight">
                   2 · Decide
                 </div>
                 <div className="text-xs text-amber-600 font-semibold truncate">
@@ -723,7 +723,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 )}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-slate-800 leading-tight">
+                <div className="text-xs font-bold text-slate-200 leading-tight">
                   3 · Broadcast
                 </div>
                 <div
@@ -759,7 +759,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     setBroadcastState("ready");
                     onLogEvent(`EAP emergency classified: ${e.icon} ${e.id}`);
                   }}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer ${selectedEmergency === e.id ? "bg-amber-600 text-slate-950 border-amber-400 font-bold shadow-md" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-300"}`}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer ${selectedEmergency === e.id ? "bg-amber-600 text-slate-950 border-amber-400 font-bold shadow-md" : "bg-white hover:bg-slate-50 text-slate-300 border-slate-300"}`}
                 >
                   <span className="text-base leading-none shrink-0">
                     {e.icon}
@@ -868,7 +868,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-base font-bold text-slate-800">
+                    <div className="text-base font-bold text-slate-200">
                       {el.bank} · Car #{el.carNumber}
                     </div>
                     <div
@@ -923,7 +923,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 Active Hazard
               </span>
             </div>
-            <p className="text-base font-black text-slate-800 uppercase">
+            <p className="text-base font-black text-slate-200 uppercase">
               OFFICE FIRE — NE SECTOR
             </p>
             <p className="text-xs text-slate-600 font-mono mt-1">
@@ -933,7 +933,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
 
           {/* NYC LL26 Checklist */}
           <div>
-            <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h4 className="text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
               <ShieldCheck size={15} className="text-amber-500" />
               NYC LL26 Action Matrix
             </h4>
@@ -950,7 +950,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     className="mt-0.5 w-4 h-4 accent-amber-500 shrink-0"
                   />
                   <span
-                    className={`text-sm leading-snug ${item.done ? "line-through text-slate-500" : "text-slate-800"}`}
+                    className={`text-sm leading-snug ${item.done ? "line-through text-slate-500" : "text-slate-200"}`}
                   >
                     {item.task}
                   </span>
@@ -979,7 +979,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <span className="text-xs font-mono font-bold uppercase text-slate-500 tracking-wider block mb-1">
                 Active Broadcast
               </span>
-              <p className="text-sm font-semibold text-slate-800 leading-snug">
+              <p className="text-sm font-semibold text-slate-200 leading-snug">
                 {activeDirective}
               </p>
             </div>
@@ -1011,7 +1011,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   <button
                     key={idx}
                     onClick={() => onDispatchDirective(preset.text)}
-                    className="w-full text-left bg-white hover:bg-slate-50 border border-slate-300 hover:border-amber-600 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:text-slate-900 transition-all cursor-pointer flex items-center gap-2"
+                    className="w-full text-left bg-white hover:bg-slate-50 border border-slate-300 hover:border-amber-600 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:text-slate-100 transition-all cursor-pointer flex items-center gap-2"
                     title={preset.text}
                   >
                     <span className="text-amber-500 shrink-0">⚡</span>
@@ -1039,7 +1039,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   type="text"
                   name="custom_directive"
                   placeholder="Custom F-89 protocol..."
-                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-sans"
+                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-sans"
                 />
                 <button
                   type="submit"
@@ -1059,7 +1059,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <span className="text-xs font-mono tracking-wider text-slate-600 uppercase">
                 Interactive Architectural Map
               </span>
-              <h3 className="text-sm font-bold text-slate-800 uppercase font-sans">
+              <h3 className="text-sm font-bold text-slate-200 uppercase font-sans">
                 Floor 7 Pilot Plan (4 Irving Plaza)
               </h3>
             </div>
@@ -1086,7 +1086,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <button
                 type="button"
                 onClick={mapZoomIn}
-                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-900 hover:border-slate-500 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-100 hover:border-slate-500 transition-all cursor-pointer"
                 title="Zoom in"
               >
                 <ZoomIn size={13} />
@@ -1094,7 +1094,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <button
                 type="button"
                 onClick={mapZoomOut}
-                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-900 hover:border-slate-500 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-100 hover:border-slate-500 transition-all cursor-pointer"
                 title="Zoom out"
               >
                 <ZoomOut size={13} />
@@ -1102,7 +1102,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <button
                 type="button"
                 onClick={mapToggleFullscreen}
-                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-900 hover:border-slate-500 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center bg-slate-900/90 border border-slate-700 rounded-lg text-slate-300 hover:text-slate-100 hover:border-slate-500 transition-all cursor-pointer"
                 title={mapFullscreen ? "Exit full screen" : "Open full screen"}
               >
                 {mapFullscreen ? (
@@ -2456,7 +2456,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             </svg>
 
             {/* Map Legend — light theme */}
-            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center gap-3 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold text-slate-700">
+            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center gap-3 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold text-slate-300">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />{" "}
                 Safe
@@ -2491,11 +2491,11 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Header Telemetry */}
             <div className="flex justify-between items-center mb-2 shrink-0">
-              <h3 className="text-xs font-mono tracking-wider text-slate-700 uppercase font-bold flex items-center gap-1">
+              <h3 className="text-xs font-mono tracking-wider text-slate-300 uppercase font-bold flex items-center gap-1">
                 <MapPin size={12} className="text-amber-500 animate-pulse" />
                 <span>Headcount & Locator</span>
               </h3>
-              <span className="text-xs bg-slate-100 border border-slate-300 text-slate-700 px-2 py-0.5 rounded-lg font-mono font-medium">
+              <span className="text-xs bg-slate-100 border border-slate-300 text-slate-300 px-2 py-0.5 rounded-lg font-mono font-medium">
                 {occupants.filter((o) => o.status === "SAFE").length} /{" "}
                 {occupants.length} ACCOUNTED
               </span>
@@ -2511,7 +2511,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   setFsdSearchQuery(e.target.value);
                   setLocatorPage(1); // Reset page on filter
                 }}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-sm text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
 
@@ -2531,7 +2531,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         : tab === "SAFE"
                           ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
                           : "bg-amber-600 text-white border border-amber-500"
-                      : "text-slate-500 hover:text-slate-700 cursor-pointer"
+                      : "text-slate-500 hover:text-slate-300 cursor-pointer"
                   }`}
                 >
                   {tab === "ALL"
@@ -2556,7 +2556,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     className={`px-1.5 py-0.5 rounded text-xs font-mono leading-none border transition-all ${
                       locatorSector === sect
                         ? "bg-amber-600 text-white border-amber-500 font-bold"
-                        : "bg-slate-100 text-slate-600 border-slate-300 hover:text-slate-700 cursor-pointer"
+                        : "bg-slate-100 text-slate-600 border-slate-300 hover:text-slate-300 cursor-pointer"
                     }`}
                   >
                     {sect === "ALL" ? "All Sectors" : sect}
@@ -2611,7 +2611,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         </div>
 
                         <div>
-                          <div className="text-sm font-bold font-mono text-slate-800 flex flex-wrap items-center gap-1">
+                          <div className="text-sm font-bold font-mono text-slate-200 flex flex-wrap items-center gap-1">
                             <span>
                               {unsealedTokenId === o.id && unsealedDetails
                                 ? unsealedDetails.name
@@ -2637,7 +2637,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         className={`text-xs font-mono font-bold leading-tight px-1.5 py-0.5 rounded border flex items-center gap-0.5 transition-all cursor-pointer ${
                           unsealedTokenId === o.id
                             ? "bg-yellow-600 text-slate-950 border-yellow-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:border-slate-300"
+                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-100 hover:border-slate-300"
                         }`}
                       >
                         <Unlock size={8} />
@@ -2713,7 +2713,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
               <button
                 disabled={activeLocatorPage === 1}
                 onClick={() => setLocatorPage((prev) => Math.max(1, prev - 1))}
-                className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-300 border border-slate-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1"
               >
                 <ChevronLeft size={10} />
                 <span>PREV</span>
@@ -2724,7 +2724,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 <span className="text-amber-400 font-bold">
                   {activeLocatorPage}
                 </span>{" "}
-                OF <span className="text-slate-700">{maxPage}</span>
+                OF <span className="text-slate-300">{maxPage}</span>
               </span>
 
               <button
@@ -2732,7 +2732,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 onClick={() =>
                   setLocatorPage((prev) => Math.min(maxPage, prev + 1))
                 }
-                className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-300 border border-slate-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1"
               >
                 <span>NEXT</span>
                 <ChevronRight size={10} />
@@ -2827,7 +2827,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
 
                       {/* Name / token */}
                       <div>
-                        <p className="text-sm font-bold text-slate-800 leading-tight truncate">
+                        <p className="text-sm font-bold text-slate-200 leading-tight truncate">
                           {isOpen && unsealedDetails
                             ? unsealedDetails.name
                             : o.nameEncrypted}
@@ -2840,7 +2840,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                       {/* Badge ID */}
                       <p className="text-xs font-mono text-slate-600">
                         Badge:{" "}
-                        <span className="text-slate-700">{o.badgeId}</span>
+                        <span className="text-slate-300">{o.badgeId}</span>
                       </p>
 
                       {/* Alert note */}
@@ -2857,7 +2857,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         className={`mt-auto text-xs font-mono font-bold px-1.5 py-0.5 rounded border flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
                           isOpen
                             ? "bg-yellow-600 text-slate-950 border-yellow-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:border-slate-300"
+                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-100 hover:border-slate-300"
                         }`}
                       >
                         <Unlock size={8} />
@@ -2916,7 +2916,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-base font-black text-slate-800 uppercase tracking-wide">
+            <span className="text-base font-black text-slate-200 uppercase tracking-wide">
               Action Pipeline
             </span>
           </div>
@@ -2961,7 +2961,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         ? "text-blue-700 bg-blue-100 border-blue-300"
                         : isAlarm
                           ? "text-red-700 bg-red-100 border-red-300"
-                          : "text-slate-700 bg-slate-100 border-slate-300";
+                          : "text-slate-300 bg-slate-100 border-slate-300";
 
               const typeLabel = isCritical
                 ? "CRITICAL"
@@ -3049,7 +3049,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="flex justify-between items-center border-b border-slate-200 pb-2 mb-3 shrink-0">
             <div className="flex items-center gap-1.5">
               <Activity className="text-amber-500" size={13} />
-              <span className="text-base font-bold tracking-tight text-slate-800">
+              <span className="text-base font-bold tracking-tight text-slate-200">
                 LIVE INCIDENT KPIs
               </span>
             </div>
@@ -3252,7 +3252,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="flex justify-between items-center border-b border-slate-200 pb-2 mb-3">
             <div className="flex items-center gap-1.5">
               <Database className="text-amber-500" size={15} />
-              <span className="text-base font-black tracking-tight text-slate-800 uppercase">
+              <span className="text-base font-black tracking-tight text-slate-200 uppercase">
                 Hash-Chained Audit Ledger
               </span>
             </div>
@@ -3284,7 +3284,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 </div>
                 <div className="text-xs text-slate-350 py-0.5">
                   Event:{" "}
-                  <span className="font-sans text-slate-700">{b.event}</span>
+                  <span className="font-sans text-slate-300">{b.event}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs mt-1 pt-1 border-t border-slate-850/30">
                   <span className="truncate text-slate-500">
@@ -3311,7 +3311,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             </button>
             <button
               onClick={onResetLedger}
-              className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs py-2.5 rounded-xl transition-all"
+              className="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-300 text-xs py-2.5 rounded-xl transition-all"
             >
               🔄 SECURE RESYNC & COMPROMISE ARREST
             </button>
@@ -3324,7 +3324,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
         <div className="flex justify-between items-center border-b border-slate-200 pb-2 mb-3">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="text-amber-500" size={15} />
-            <span className="text-base font-black tracking-tight text-slate-800 uppercase">
+            <span className="text-base font-black tracking-tight text-slate-200 uppercase">
               Pilot Success Metrics — Floor 7
             </span>
           </div>
@@ -3402,7 +3402,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 className="rounded-xl border bg-white border-slate-200 p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-sm font-bold text-slate-800 leading-tight">
+                  <span className="text-sm font-bold text-slate-200 leading-tight">
                     {g.title}
                   </span>
                   <span
@@ -3436,18 +3436,18 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-5 shadow-2xl flex flex-col h-[520px]">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
-              <h3 className="text-sm font-bold text-slate-800">
+              <h3 className="text-sm font-bold text-slate-200">
                 Legal Compliance Pre-Arrival Report
               </h3>
               <button
                 onClick={() => setFdnyReport(null)}
-                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 px-2 py-1 rounded"
+                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-300 hover:text-slate-100 px-2 py-1 rounded"
               >
                 Close Report
               </button>
             </div>
 
-            <pre className="flex-1 bg-slate-50 text-slate-700 p-4 rounded-xl font-mono text-xs leading-relaxed overflow-auto border border-slate-200 select-text">
+            <pre className="flex-1 bg-slate-50 text-slate-300 p-4 rounded-xl font-mono text-xs leading-relaxed overflow-auto border border-slate-200 select-text">
               {fdnyReport}
             </pre>
 
@@ -3459,7 +3459,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 onClick={() => {
                   window.print();
                 }}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono px-3 py-2 rounded-lg border border-slate-300"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-300 text-xs font-mono px-3 py-2 rounded-lg border border-slate-300"
               >
                 Print PDF File
               </button>
