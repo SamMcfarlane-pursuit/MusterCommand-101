@@ -915,6 +915,12 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
         {/* PANEL 1: INCIDENT STATUS & F-89 DISPATCH */}
         <div className="xl:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-5 overflow-y-auto no-scrollbar">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-200">
+            <Flame size={16} className="text-red-600 shrink-0" />
+            <span className="text-sm font-black text-slate-200 uppercase tracking-wide">
+              Incident Control
+            </span>
+          </div>
           {/* Incident summary */}
           <div className="bg-red-50 border border-red-300 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
@@ -1011,11 +1017,11 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   <button
                     key={idx}
                     onClick={() => onDispatchDirective(preset.text)}
-                    className="w-full text-left bg-white hover:bg-slate-50 border border-slate-300 hover:border-amber-600 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:text-slate-100 transition-all cursor-pointer flex items-center gap-2"
+                    className="w-full text-left bg-white hover:bg-slate-50 border border-slate-300 hover:border-amber-600 px-3 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-slate-100 transition-all cursor-pointer flex items-start gap-2"
                     title={preset.text}
                   >
-                    <span className="text-amber-500 shrink-0">⚡</span>
-                    <span className="truncate">{preset.title}</span>
+                    <span className="text-amber-500 shrink-0 mt-0.5">⚡</span>
+                    <span className="leading-snug">{preset.title}</span>
                   </button>
                 ))}
               </div>
@@ -2498,14 +2504,24 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Header Telemetry */}
             <div className="flex justify-between items-center mb-2 shrink-0">
-              <h3 className="text-xs font-mono tracking-wider text-slate-300 uppercase font-bold flex items-center gap-1">
-                <MapPin size={12} className="text-amber-500 animate-pulse" />
+              <h3 className="text-base font-black text-slate-200 flex items-center gap-2">
+                <MapPin
+                  size={16}
+                  className="text-amber-500 animate-pulse shrink-0"
+                />
                 <span>Headcount & Locator</span>
               </h3>
-              <span className="text-xs bg-slate-100 border border-slate-300 text-slate-300 px-2 py-0.5 rounded-lg font-mono font-medium">
-                {occupants.filter((o) => o.status === "SAFE").length} /{" "}
-                {occupants.length} ACCOUNTED
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-black text-emerald-700">
+                  {occupants.filter((o) => o.status === "SAFE").length}
+                </span>
+                <span className="text-sm text-slate-500 font-mono">
+                  / {occupants.length}
+                </span>
+                <span className="text-xs bg-emerald-100 text-emerald-700 border border-emerald-300 px-2 py-0.5 rounded-lg font-bold ml-1">
+                  ACCOUNTED
+                </span>
+              </div>
             </div>
 
             {/* Inline search filter */}
@@ -2518,7 +2534,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                   setFsdSearchQuery(e.target.value);
                   setLocatorPage(1); // Reset page on filter
                 }}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-sm text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
               />
             </div>
 
@@ -2531,7 +2547,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     setLocatorTab(tab);
                     setLocatorPage(1);
                   }}
-                  className={`py-1 text-xs font-mono font-bold rounded-lg transition-all ${
+                  className={`py-2.5 text-sm font-bold rounded-lg transition-all ${
                     locatorTab === tab
                       ? tab === "AT_RISK"
                         ? "bg-red-100 text-red-700 border border-red-300"
@@ -2560,10 +2576,10 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                       setLocatorSector(sect);
                       setLocatorPage(1);
                     }}
-                    className={`px-1.5 py-0.5 rounded text-xs font-mono leading-none border transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                       locatorSector === sect
-                        ? "bg-amber-600 text-white border-amber-500 font-bold"
-                        : "bg-slate-100 text-slate-600 border-slate-300 hover:text-slate-300 cursor-pointer"
+                        ? "bg-amber-600 text-white border-amber-500"
+                        : "bg-white text-slate-500 border-slate-300 hover:text-slate-200 hover:border-amber-500 cursor-pointer"
                     }`}
                   >
                     {sect === "ALL" ? "All Sectors" : sect}
@@ -2578,7 +2594,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                 paginatedLocatorOccupants.map((o) => (
                   <div
                     key={o.id}
-                    className={`p-2 rounded-xl border flex flex-col justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex flex-col gap-2 transition-all ${
                       o.id === unsealedTokenId
                         ? "bg-slate-50 border-amber-500/70 shadow-lg"
                         : o.status === "CRITICAL"
@@ -2593,7 +2609,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     <div className="flex justify-between items-start gap-1">
                       <div className="flex gap-2">
                         <div className="mt-1 shrink-0">
-                          <span className={`relative flex h-2 w-2`}>
+                          <span className={`relative flex h-3 w-3`}>
                             {o.status !== "SAFE" && (
                               <span
                                 className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
@@ -2604,7 +2620,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                               />
                             )}
                             <span
-                              className={`relative inline-flex rounded-full h-2 w-2 ${
+                              className={`relative inline-flex rounded-full h-3 w-3 ${
                                 o.status === "SAFE"
                                   ? "bg-emerald-500"
                                   : o.status === "CRITICAL"
@@ -2618,20 +2634,25 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                         </div>
 
                         <div>
-                          <div className="text-sm font-bold font-mono text-slate-200 flex flex-wrap items-center gap-1">
+                          <div className="text-sm font-bold text-slate-200 flex flex-wrap items-center gap-1">
                             <span>
                               {unsealedTokenId === o.id && unsealedDetails
                                 ? unsealedDetails.name
                                 : o.nameEncrypted}
                             </span>
-                            <span className="text-xs text-slate-500 bg-slate-100 px-1 py-0.2 rounded font-normal font-mono border border-slate-200 uppercase">
+                            <span className="text-xs text-slate-400 font-mono hidden">
                               {o.id}
                             </span>
                           </div>
 
-                          <div className="text-xs text-slate-600 font-mono mt-0.5 leading-tight">
-                            Badge {o.badgeId} • Role: {o.role} • Quadrant:{" "}
-                            <span className="text-amber-400 font-semibold">
+                          <div className="text-xs text-slate-500 font-mono leading-tight flex flex-wrap gap-2 mt-0.5">
+                            <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                              {o.badgeId}
+                            </span>
+                            <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                              {o.role}
+                            </span>
+                            <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded border border-amber-300 font-bold">
                               {o.quadrant}
                             </span>
                           </div>
@@ -2641,15 +2662,15 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                       {/* Decrypt Actions trigger */}
                       <button
                         onClick={() => handleUnsealFsd(o.id)}
-                        className={`text-xs font-mono font-bold leading-tight px-1.5 py-0.5 rounded border flex items-center gap-0.5 transition-all cursor-pointer ${
+                        className={`text-xs font-bold py-1.5 px-3 rounded-lg border flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
                           unsealedTokenId === o.id
-                            ? "bg-yellow-600 text-slate-950 border-yellow-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-100 hover:border-slate-300"
+                            ? "bg-amber-500 text-white border-amber-400"
+                            : "bg-white text-slate-500 border-slate-300 hover:text-slate-200 hover:border-amber-500"
                         }`}
                       >
-                        <Unlock size={8} />
+                        <Unlock size={12} />
                         <span>
-                          {unsealedTokenId === o.id ? "SEAL" : "JIT UNSEAL"}
+                          {unsealedTokenId === o.id ? "Seal" : "Unseal ID"}
                         </span>
                       </button>
                     </div>
@@ -2697,8 +2718,8 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                     )}
 
                     {o.alertNote && (
-                      <div className="mt-1 bg-slate-50 px-1.5 py-0.5 rounded text-xs text-amber-700 italic line-clamp-1 border border-slate-200">
-                        “{o.alertNote}”
+                      <div className="bg-amber-50 px-2.5 py-1.5 rounded-lg text-xs text-amber-800 font-medium border border-amber-200">
+                        ⚠️ {o.alertNote}
                       </div>
                     )}
 
@@ -2751,10 +2772,10 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
           <div className="border-t border-slate-200 pt-3 mt-3 shrink-0">
             <button
               onClick={generateFdnyReport}
-              className="w-full bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+              className="w-full bg-amber-600 hover:bg-amber-500 border border-amber-500 text-white text-sm font-black py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer"
             >
-              <FileText size={14} className="text-amber-500" />
-              GENERATE PRE-ARRIVAL FDNY REPORT
+              <FileText size={16} className="text-white" />
+              Generate FDNY Pre-Arrival Report
             </button>
           </div>
         </div>
@@ -2776,20 +2797,20 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             <div className="flex items-center justify-between border-b border-amber-200 pb-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <Accessibility className="text-amber-400" size={14} />
-                <span className="text-xs font-bold tracking-tight text-amber-700">
+                <span className="text-base font-black text-amber-700">
                   ♿ EVAC-CHAIR LIST — Area of Rescue Assistance
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 {inTransit.length > 0 && (
-                  <span className="text-xs bg-red-100 text-red-700 border border-red-300 px-1.5 py-0.5 rounded font-mono font-bold uppercase animate-pulse">
+                  <span className="text-xs bg-red-100 text-red-700 border border-red-300 px-3 py-1.5 rounded-lg font-bold uppercase animate-pulse">
                     {inTransit.length} IN TRANSIT
                   </span>
                 )}
-                <span className="text-xs bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+                <span className="text-xs bg-blue-100 text-blue-700 border border-blue-300 px-3 py-1.5 rounded-lg font-bold uppercase">
                   STAGED {staged.length}/{denominator}
                 </span>
-                <span className="text-xs bg-slate-100 text-slate-600 border border-slate-300 px-1.5 py-0.5 rounded font-mono uppercase">
+                <span className="text-xs bg-slate-100 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg font-bold uppercase">
                   FDNY PRIORITY
                 </span>
               </div>
@@ -2861,14 +2882,14 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
                       <button
                         type="button"
                         onClick={() => handleUnsealFsd(o.id)}
-                        className={`mt-auto text-xs font-mono font-bold px-1.5 py-0.5 rounded border flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                        className={`mt-auto text-xs font-bold py-1.5 px-3 rounded-lg border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           isOpen
-                            ? "bg-yellow-600 text-slate-950 border-yellow-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:text-slate-100 hover:border-slate-300"
+                            ? "bg-amber-500 text-white border-amber-400"
+                            : "bg-white text-slate-500 border-slate-300 hover:text-slate-200 hover:border-amber-500"
                         }`}
                       >
-                        <Unlock size={8} />
-                        <span>{isOpen ? "SEAL" : "JIT UNSEAL"}</span>
+                        <Unlock size={12} />
+                        <span>{isOpen ? "Seal" : "Unseal ID"}</span>
                       </button>
 
                       {/* Inline vault drawer */}
@@ -3406,7 +3427,7 @@ IN TRANSIT    : ${occupants.filter((o) => (o.mobilityImpaired || o.isAtARA) && !
             return (
               <div
                 key={g.id}
-                className="rounded-xl border bg-white border-slate-200 p-4 shadow-sm"
+                className="rounded-xl border bg-slate-50 border-slate-200 p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-sm font-bold text-slate-200 leading-tight">
